@@ -25,12 +25,15 @@ export class Mt5BridgeClient extends EventEmitter {
     this._nextId = 1;
     this._restarting = false;
     this.connected = false;
+    this._stopped = false;
     this._restartTimer = null;
   }
 
   /** 启动子进程（幂等：已启动则忽略）。 */
   start() {
     if (this.child) return;
+    this._stopped = false;
+    this._restarting = false;
     const env = { ...process.env };
     if (this.opts.terminalPath) env.MT5_TERMINAL = this.opts.terminalPath;
     if (this.opts.login) env.MT5_LOGIN = String(this.opts.login);
@@ -55,7 +58,7 @@ export class Mt5BridgeClient extends EventEmitter {
       const err = new Error('MT5 桥进程已退出 (code=' + code + ' signal=' + signal + ')');
       for (const [, p] of this._pending) p.rej(err);
       this._pending.clear();
-      this._scheduleRestart();
+      if (!this._stopped) this._scheduleRestart();
     });
   }
 
@@ -119,7 +122,9 @@ export class Mt5BridgeClient extends EventEmitter {
 
   /** 关闭子进程。 */
   stop() {
+    this._stopped = true;
     if (this._restartTimer) { clearTimeout(this._restartTimer); this._restartTimer = null; }
+    this._restarting = false;
     if (!this.child) return;
     try { this.child.kill(); } catch { /* ignore */ }
     this.child = null;
