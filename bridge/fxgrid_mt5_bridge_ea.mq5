@@ -71,14 +71,15 @@ int OnInit()
    int poll = EA_POLL_MS < 200 ? 200 : EA_POLL_MS;
    if(!EventSetMillisecondTimer(poll))
    {
+      Diag("EventSetMillisecondTimer 失败");
       Print("fxgrid-bridge: EventSetMillisecondTimer 失败");
       return(INIT_FAILED);
    }
    g_timer_ms = poll;
 
+   Diag("started, symbols=" + EA_SYMBOLS + ", server=" + g_base);
    Print("fxgrid-bridge: started, symbols=", EA_SYMBOLS, ", server=", g_base);
    // 启动立即上报一次
-   EventSetTimer(0); // 无操作,触发不了; 直接调
    SendState();
    return(INIT_SUCCEEDED);
 }
@@ -130,13 +131,24 @@ void SendState()
       int err = GetLastError();
       // 4014 = 白名单未包含 URL; 4015 = 连接失败
       if(err == 4014)
+      {
+         Diag("WebRequest 被拒(4014)！白名单未包含 " + g_base + "。请在 工具->选项->EA交易->WebRequest允许列表 添加");
          Print("fxgrid-bridge: WebRequest 被拒(4014)。请在 MT5 工具->选项->EA交易->WebRequest允许列表 添加: ", g_base);
+      }
       else if(err != 0 && err != 10035)
+      {
+         Diag("WebRequest 失败 code=" + IntegerToString(code) + " err=" + IntegerToString(err));
          Print("fxgrid-bridge: /state 失败 code=", code, " err=", err);
+      }
    }
    else if(code != 200)
    {
+      Diag("/state HTTP " + IntegerToString(code));
       Print("fxgrid-bridge: /state HTTP ", code);
+   }
+   else
+   {
+      Diag("/state OK (" + IntegerToString(ArraySize(resp)) + "B resp)");
    }
 }
 
@@ -511,6 +523,19 @@ string ClosePosition(string symbol)
          errors += IntegerToString(ticket) + ":" + DoubleToString(res.retcode, 0) + " " + res.comment + ";";
    }
    return("{\"ok\":true,\"closed\":" + IntegerToString(closed) + ",\"errors\":\"" + errors + "\"}");
+}
+
+//+------------------------------------------------------------------+
+//| 诊断日志（写文件，便于命令行读取，区别于 Print 只进专家标签）       |
+//+------------------------------------------------------------------+
+void Diag(string msg)
+{
+   string fn = "fxgrid_bridge_diag.log";
+   int h = FileOpen(fn, FILE_READ|FILE_WRITE|FILE_TXT|FILE_ANSI);
+   if(h == INVALID_HANDLE) return;
+   FileSeek(h, 0, SEEK_END);
+   FileWriteString(h, TimeToString(TimeCurrent()) + " " + msg + "\n");
+   FileClose(h);
 }
 
 //+------------------------------------------------------------------+

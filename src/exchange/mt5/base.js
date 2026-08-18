@@ -116,7 +116,13 @@ export class Mt5Base extends EventEmitter {
 
   async getMarkets() {
     if (this.markets.size === 0) await this.refreshMarket();
-    return [...this.markets.values()];
+    const list = [...this.markets.values()];
+    // 返回时附加实时价格（避免前端拿启动时的静态种子价）
+    const live = this.prices.get(this._marketId);
+    if (live != null) {
+      for (const m of list) m.lastPrice = live;
+    }
+    return list;
   }
 
   /** 读取实时价格（桥 get_price -> bid/ask 取中价）。离线时生成合成价格兜底。 */
