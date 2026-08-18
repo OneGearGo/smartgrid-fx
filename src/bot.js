@@ -351,6 +351,8 @@ export class GridBot {
       // 区间外止损策略：'close'=冲破区间平仓（撤单+平仓+停止）；'recover'=只减仓回收阶梯
       outOfRangeAction: cfg.outOfRangeAction === 'recover' ? 'recover' : 'close',
       stepSize: market.stepSize, stepPrice: market.stepPrice,
+      // 合约规模：外汇/CFD 保证金按手数×合约规模计算（1 手 EURUSD=10万、XAUUSD=100盎司）
+      contractSize: Number(market.contractSize) > 0 ? Number(market.contractSize) : 1,
     };
     this.grid = buildGrid({ lower: this.config.lower, upper: this.config.upper, gridCount: this.config.gridCount });
     this._recomputeRisk();
@@ -513,7 +515,8 @@ export class GridBot {
     }
     const newGrid = buildGrid({ lower: lo, upper: hi, gridCount: this.config.gridCount });
     const mid = (lo + hi) / 2;
-    const notional = newGrid.count * this.config.sizeBase * mid;
+    const cs = Number(this.config.contractSize) > 0 ? Number(this.config.contractSize) : 1;
+    const notional = newGrid.count * this.config.sizeBase * cs * mid;
     const requiredMargin = notional / this.config.leverage;
     const available = typeof this.ex.equity === 'number' ? this.ex.equity
       : typeof this.ex.balance === 'number' ? this.ex.balance : null;
@@ -580,7 +583,8 @@ export class GridBot {
       return this.getState();
     }
     // 新增开仓单的保证金预检
-    const addMargin = (seeds.length * this.config.sizeBase * price) / this.config.leverage;
+    const cs = Number(this.config.contractSize) > 0 ? Number(this.config.contractSize) : 1;
+    const addMargin = (seeds.length * this.config.sizeBase * cs * price) / this.config.leverage;
     const available = typeof this.ex.equity === 'number' ? this.ex.equity
       : typeof this.ex.balance === 'number' ? this.ex.balance : null;
     if (available != null && addMargin > available) {
@@ -624,7 +628,9 @@ export class GridBot {
   _recomputeRisk() {
     if (!this.grid || !this.config) return;
     const mid = (this.config.lower + this.config.upper) / 2;
-    const notional = this.grid.count * this.config.sizeBase * mid;
+    // 外汇保证金：名义敞口 = 格数 × 手数 × 合约规模 × 中间价
+    const cs = Number(this.config.contractSize) > 0 ? Number(this.config.contractSize) : 1;
+    const notional = this.grid.count * this.config.sizeBase * cs * mid;
     this.risk = {
       leverage: this.config.leverage,
       notional: round2(notional),

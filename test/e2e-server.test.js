@@ -81,7 +81,7 @@ await test('xau 启动网格 -> 状态 -> 停止', async () => {
   const upper = Math.round((price + 20) * 100) / 100;
   const start = await post('/api/xau/start', {
     marketId: 1, mode: 'neutral', lower, upper,
-    gridCount: 10, sizeBase: 0.1, leverage: 10, outOfRangeAction: 'close',
+    gridCount: 10, sizeBase: 0.01, leverage: 100, outOfRangeAction: 'close',
   });
   assert.equal(start.error, undefined, 'start 不应报错: ' + start.error);
   assert.equal(start.running, true);

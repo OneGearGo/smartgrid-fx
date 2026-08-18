@@ -304,7 +304,7 @@ string BuildStateJson()
    s += ",\"trade_mode\":" + IntegerToString(trade_mode);
    s += "}";
 
-   // 品种 tick
+   // 品种 tick（含合约规模，用于外汇保证金计算）
    s += ",\"prices\":[";
    for(int i = 0; i < g_symbols_count; i++)
    {
@@ -313,6 +313,7 @@ string BuildStateJson()
       bool got = SymbolInfoTick(sym, tick);
       if(i > 0) s += ",";
       s += "{\"symbol\":\"" + sym + "\"";
+      s += ",\"contract_size\":" + DoubleToString(SymbolInfoDouble(sym, SYMBOL_TRADE_CONTRACT_SIZE), 0);
       if(got)
       {
          s += ",\"bid\":" + DoubleToString(tick.bid, _DigitsFor(sym));

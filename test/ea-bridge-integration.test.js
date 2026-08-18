@@ -20,8 +20,8 @@ async function eaReport(srv, { bid = 2400.0, ask = 2400.2, orders = [], position
   const body = JSON.stringify({
     account: { login: 12345678, server: 'Fake-Demo', balance: 10000, equity: 10050, margin: 0, margin_free: 10050, leverage: 100, trade_mode: 0 },
     prices: [
-      { symbol: 'XAUUSD', bid, ask, time: Date.now() },
-      { symbol: 'EURUSD', bid: 1.0850, ask: 1.0852, time: Date.now() },
+      { symbol: 'XAUUSD', bid, ask, contract_size: 100, time: Date.now() },
+      { symbol: 'EURUSD', bid: 1.0850, ask: 1.0852, contract_size: 100000, time: Date.now() },
     ],
     orders,
     positions,
@@ -71,7 +71,7 @@ await test('EA 桥模式 GridBot 启动 -> 成交 -> 替换全流程', async () 
   await eaReport(srv, { bid: 2400.0, ask: 2400.2 });
 
   const bot = new GridBot(ex, { cancelVerifyAttempts: 2, cancelVerifyDelayMs: 0, cancelVerifyStableReads: 2 });
-  await bot.start({ marketId: 1, mode: 'neutral', lower: 2350, upper: 2450, gridCount: 10, sizeBase: 0.1, leverage: 10, outOfRangeAction: 'close' });
+  await bot.start({ marketId: 1, mode: 'neutral', lower: 2350, upper: 2450, gridCount: 10, sizeBase: 0.01, leverage: 100, outOfRangeAction: 'close' });
   assert.equal(bot.running, true);
   assert.ok(bot.active.size >= 8, `挂单 ${bot.active.size}`);
   assert.ok(bot.lastPrice > 0, '应有价格');

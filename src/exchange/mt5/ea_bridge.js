@@ -31,6 +31,7 @@ export class EaBridgeServer extends EventEmitter {
     this.lastStateAt = null;
     this.account = null;
     this.prices = new Map();       // symbol -> {bid, ask, time}
+    this.specs = new Map();        // symbol -> {contractSize, digits, volumeMin, ...}
     this.orders = [];              // EA 上报的挂单
     this.positions = [];           // EA 上报的持仓
     this._cmdQueue = [];           // 待 EA 拉取的命令 {id, verb, line, resolve, reject, timer}
@@ -106,7 +107,15 @@ export class EaBridgeServer extends EventEmitter {
     if (j.account) this.account = j.account;
     if (Array.isArray(j.prices)) {
       for (const p of j.prices) {
-        if (p?.symbol) this.prices.set(p.symbol, { bid: Number(p.bid), ask: Number(p.ask), time: Number(p.time) });
+        if (p?.symbol) {
+          const sym = p.symbol.toUpperCase();
+          this.prices.set(sym, { bid: Number(p.bid), ask: Number(p.ask), time: Number(p.time) });
+          // 缓存合约规模（EA 上报，用于外汇保证金计算）
+          if (p.contract_size > 0) {
+            const prev = this.specs.get(sym) || {};
+            this.specs.set(sym, { ...prev, contractSize: Number(p.contract_size) });
+          }
+        }
       }
     }
     if (Array.isArray(j.orders)) this.orders = j.orders;
@@ -170,9 +179,20 @@ export class EaBridgeServer extends EventEmitter {
         return Promise.resolve(p || null);
       }
       case 'get_symbols': {
-        // EA 当前不上报规格；返回 null 让适配器走兜底规格（FALLBACK_SPECS，
-        // 保证 digits/step 等品种参数正确）。EA 后续增强后可改为真实规格。
-        return Promise.resolve(null);
+        // 从 EA 上报的合约规模构建规格（外汇保证金计算需要 contractSize）；
+        // 未上报的品种返回 null 让适配器走兜底规格。
+        const out = [];
+        for (const sym of params.symbols || this.symbols) {
+          const sp = this.specs.get(String(sym).toUpperCase());
+          if (!sp || !sp.contractSize) continue;
+          out.push({
+            name: String(sym).toUpperCase(),
+            digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01,
+            trade_tick_size: 0.00001,
+            contractSize: sp.contractSize,
+          });
+        }
+        return Promise.resolve(out.length ? out : null);
       }
       case 'open_orders':
         return Promise.resolve(this.orders.filter((o) => !params.magic || Number(o.magic) === Number(params.magic)));

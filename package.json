@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "check:config": "node scripts/preflight.js",
-    "test": "node test/config.test.js && node test/grid.test.js && node test/cancel-safety.test.js && node test/overview.test.js && node test/exchange-mt5.test.js && node test/grid-flows.test.js && node test/bridge-lifecycle.test.js && node test/e2e-server.test.js && node test/ea-bridge.test.js && node test/ea-bridge-integration.test.js"
+    "test": "node test/config.test.js && node test/grid.test.js && node test/cancel-safety.test.js && node test/overview.test.js && node test/exchange-mt5.test.js && node test/grid-flows.test.js && node test/bridge-lifecycle.test.js && node test/e2e-server.test.js && node test/ea-bridge.test.js && node test/ea-bridge-integration.test.js && node test/margin.test.js"
   },
   "engines": {
     "node": ">=20"

@@ -4,12 +4,14 @@
 import { EventEmitter } from 'node:events';
 
 // 终端离线时的兜底规格（保证程序能启动、能显示界面）
+// contractSize = 合约规模：1 手对应的标的数量（外汇保证金计算的关键）
+//   XAUUSD 1手=100盎司；直盘 1手=10万基础货币；NAS100 1手=10份指数
 const FALLBACK_SPECS = {
-  XAUUSD: { digits: 2, point: 0.01, volume_min: 0.01, volume_step: 0.01, spread: 20, trade_tick_size: 0.01 },
-  EURUSD: { digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01, spread: 8, trade_tick_size: 0.00001 },
-  GBPUSD: { digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01, spread: 12, trade_tick_size: 0.00001 },
-  USDJPY: { digits: 3, point: 0.001, volume_min: 0.01, volume_step: 0.01, spread: 10, trade_tick_size: 0.001 },
-  NAS100: { digits: 2, point: 0.01, volume_min: 0.1, volume_step: 0.1, spread: 100, trade_tick_size: 0.01 },
+  XAUUSD: { digits: 2, point: 0.01, volume_min: 0.01, volume_step: 0.01, spread: 20, trade_tick_size: 0.01, contractSize: 100 },
+  EURUSD: { digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01, spread: 8, trade_tick_size: 0.00001, contractSize: 100000 },
+  GBPUSD: { digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01, spread: 12, trade_tick_size: 0.00001, contractSize: 100000 },
+  USDJPY: { digits: 3, point: 0.001, volume_min: 0.01, volume_step: 0.01, spread: 10, trade_tick_size: 0.001, contractSize: 100000 },
+  NAS100: { digits: 2, point: 0.01, volume_min: 0.1, volume_step: 0.1, spread: 100, trade_tick_size: 0.01, contractSize: 10 },
 };
 // 合成行情初始价（终端离线时从合理价位起步，而非 0.01 这种点值）
 const FALLBACK_SEEDS = {
@@ -110,6 +112,9 @@ export class Mt5Base extends EventEmitter {
       point: spec.point ?? 0.00001,
       spread: spec.spread ?? 0,
       tickSize: stepPrice,
+      // 合约规模：Python 桥返回 trade_contract_size，EA 桥/兜底用 contractSize
+      contractSize: Number(spec.trade_contract_size ?? spec.contractSize) > 0
+        ? Number(spec.trade_contract_size ?? spec.contractSize) : 1,
     };
     this.markets.set(m.marketId, m);
   }
