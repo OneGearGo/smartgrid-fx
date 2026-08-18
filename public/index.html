@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>外汇网格交易总控台</title>
+<style>
+  body { background:#0a0e17; color:#dde6f0; font:13px/1.5 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; padding:24px; }
+  h1 { font-size:18px; margin-bottom:8px; }
+  h1 span { color:#8b5cf6; }
+  .panel { background:#141924; border:1px solid #1e2d45; border-radius:10px; padding:16px; margin-bottom:14px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th,td { text-align:right; padding:6px 8px; border-bottom:1px solid #1e2d45; }
+  th:first-child,td:first-child { text-align:left; }
+  th { color:#8fa5c0; }
+  .ok { color:#22c55e; } .warn { color:#f59e0b; } .err { color:#ef4444; } .mut { color:#6b82a0; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+  .pill-paper { background:#3b82f618; color:#93c5fd; border:1px solid #3b82f640; }
+  .pill-live { background:#ef444418; color:#fca5a5; border:1px solid #ef444440; }
+</style>
+</head>
+<body>
+<h1>外汇网格交易<span>总控台</span> · v0.1.0（骨架）</h1>
+<p class="mut">完整前端（5 品种控制面板 + 总览 + AI + IP 配置）即将接入。当前为 API 验证页面。</p>
+<div id="overview" class="panel">加载中…</div>
+<script>
+const SLOTS = ['eur', 'gbp', 'jpy', 'xau', 'nas'];
+const NAMES = { eur: 'EURUSD', gbp: 'GBPUSD', jpy: 'USDJPY', xau: 'XAUUSD', nas: 'NAS100' };
+async function load() {
+  try {
+    const r = await fetch('/api/overview');
+    const j = await r.json();
+    const rows = SLOTS.map((k) => {
+      const s = j[k] || {};
+      const health = s.health?.status || 'idle';
+      const cls = health === 'ok' ? 'ok' : health === 'warn' ? 'warn' : health === 'error' ? 'err' : 'mut';
+      const price = s.lastPrice != null ? Number(s.lastPrice).toFixed(2) : '—';
+      return `<tr>
+        <td><b>${NAMES[k]}</b> <span class="pill ${s.mode === 'live' ? 'pill-live' : 'pill-paper'}">${s.mode.toUpperCase()}</span></td>
+        <td class="${cls}">${health}${s.health?.reason ? ' · ' + s.health.reason : ''}</td>
+        <td>${s.running ? '运行中' : '已停止'}</td>
+        <td>${price}</td>
+        <td>${s.balance ?? '—'}</td>
+        <td>${s.equity ?? '—'}</td>
+        <td>${s.totalPnl ?? 0}</td>
+        <td>${s.completedRungs ?? 0}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('overview').innerHTML =
+      '<table><tr><th>品种</th><th>健康</th><th>状态</th><th>价格</th><th>余额</th><th>权益</th><th>总盈亏</th><th>完成格</th></tr>' + rows + '</table>';
+  } catch (e) {
+    document.getElementById('overview').innerHTML = '<span class="err">加载失败: ' + e.message + '</span>';
+  }
+}
+load();
+setInterval(load, 3000);
+</script>
+</body>
+</html>
