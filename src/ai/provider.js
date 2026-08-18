@@ -96,7 +96,28 @@ export async function aiChat({ system = '', messages, small = false, json = fals
   });
   const j = await res.json().catch(() => null);
   if (!res.ok) throw new Error(`AI 接口错误 HTTP ${res.status}: ${j?.error?.message || JSON.stringify(j || {}).slice(0, 200)}`);
-  const text = j?.choices?.[0]?.message?.content;
+  let text = j?.choices?.[0]?.message?.content;
+  const finish = j?.choices?.[0]?.finish_reason;
+  // 推理模型（如 DeepSeek V4 系列）：思考过程(reasoning_content)会吃掉 max_tokens，
+  // 可能出现 content 为空 + finish_reason=length。此时重试一次并大幅加大预算。
+  if ((!text || !text.trim()) && finish === 'length') {
+    const retryTokens = Math.min(16000, Math.max(maxTokens * 3, 4000));
+    const res2 = await fetch(cfg.baseUrl + '/chat/completions', {
+      method: 'POST', signal,
+      headers: { Authorization: 'Bearer ' + cfg.apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model, max_tokens: retryTokens, temperature,
+        messages: [
+          ...(system ? [{ role: 'system', content: system + (json ? '\n必须只输出一个合法 JSON 对象，不要任何其他文字。' : '') }] : []),
+          ...messages.map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
+        ],
+        ...(json ? { response_format: { type: 'json_object' } } : {}),
+      }),
+    });
+    const j2 = await res2.json().catch(() => null);
+    if (!res2.ok) throw new Error(`AI 接口错误 HTTP ${res2.status}: ${j2?.error?.message || JSON.stringify(j2 || {}).slice(0, 200)}`);
+    text = j2?.choices?.[0]?.message?.content;
+  }
   if (!text) throw new Error('AI 返回为空');
   return text;
 }

@@ -115,13 +115,14 @@ class AiService {
       const text = await aiChat({
         small: true, json: true, maxTokens: 900, temperature: 0.1,
         system: [
-          '你是五交易所网格交易机器人的风控值守 AI。根据状态快照，对每个交易所分别给出巡检结论，并给一句整体结论。',
+          '你是外汇网格交易机器人的风控值守 AI（管理 EURUSD/GBPUSD/USDJPY/XAUUSD/NAS100 五个品种）。根据状态快照，对每个品种分别给出巡检结论，并给一句整体结论。',
           '重点关注：health.status 为 error/warn 及其 reason；trackedOrders 与 exchangeOpenOrders 明显不一致（挂单同步漂移）；',
           '保证金/权益吃紧（未实现亏损占权益比例大、returnPct 恶化）；outOfRange=true（价格冲出网格区间）；',
           '告警里的关键词（保证金不足、频繁取消、未确认成交、接口异常、暂停补单）；数据长时间未更新。',
-          '注意：paper 是模拟盘，问题降级处理；未运行的交易所 level 用 ok、summary 写"未运行"即可。回复 JSON：',
+          '注意：paper 是模拟盘，问题降级处理；未运行的品种 level 用 ok、summary 写"未运行"即可。回复 JSON：',
           '{"overall":{"level":"ok|warn|critical","summary":"整体一句话(中文)"},',
-          '"per":{"de":{"level":"ok|warn|critical","summary":"该所结论(中文,50字内)","advice":"操作建议(中文,无则空)"},"ex":{...},"rs":{...},"ar":{...},"lr":{...}}}',
+          '"per":{"eur":{"level":"ok|warn|critical","summary":"该品种结论(中文,50字内)","advice":"操作建议(中文,无则空)"},"gbp":{...},"jpy":{...},"xau":{...},"nas":{...}}}',
+          '注意：per 的 key 必须是 eur/gbp/jpy/xau/nas 五个之一，不要用其他名称。',
         ].join('\n'),
         messages: [{ role: 'user', content: '状态快照：\n' + JSON.stringify(snap) }],
       });
