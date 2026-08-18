@@ -100,15 +100,19 @@ export class PaperMt5 extends Mt5Base {
 
   // ── 价格 tick → 撮合 ────────────────────────────────────────────────────
   async _tick() {
-    const t = await this.bridge.call('get_price', { symbol: this.symbol }, 15000).catch(() => null);
-    if (!t || !Number.isFinite(t.bid) || t.bid <= 0 || !Number.isFinite(t.ask) || t.ask <= 0) return;
-    const mid = (t.bid + t.ask) / 2;
-    this._lastKnownPrice = mid;
-    this.prices.set(this._marketId, mid);
-    this.lastOkAt = Date.now();
-    if (this.dataSource === 'synthetic' && this._specs) this.dataSource = 'real';
+    // 真实价格走桥；桥离线时 refreshPrice 自动生成合成价格兜底
+    const mid = await this.refreshPrice();
+    if (mid == null) return;
+    // 撮合用真实 bid/ask（合成模式下无 tick，用 mid 近似）
+    let bid = mid, ask = mid;
+    if (this.dataSource === 'real') {
+      const t = await this.bridge.call('get_price', { symbol: this.symbol }, 15000).catch(() => null);
+      if (t && Number.isFinite(t.bid) && t.bid > 0 && Number.isFinite(t.ask) && t.ask > 0) {
+        bid = t.bid; ask = t.ask;
+      }
+    }
     this.emit('price', { marketId: this._marketId, price: mid });
-    this._match(t.bid, t.ask);
+    this._match(bid, ask);
   }
 
   _match(bid, ask) {

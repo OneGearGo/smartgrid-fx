@@ -11,6 +11,10 @@ const FALLBACK_SPECS = {
   USDJPY: { digits: 3, point: 0.001, volume_min: 0.01, volume_step: 0.01, spread: 10, trade_tick_size: 0.001 },
   NAS100: { digits: 2, point: 0.01, volume_min: 0.1, volume_step: 0.1, spread: 100, trade_tick_size: 0.01 },
 };
+// 合成行情初始价（终端离线时从合理价位起步，而非 0.01 这种点值）
+const FALLBACK_SEEDS = {
+  XAUUSD: 2400, EURUSD: 1.08, GBPUSD: 1.27, USDJPY: 157, NAS100: 21000,
+};
 
 export class Mt5Base extends EventEmitter {
   /**
@@ -30,6 +34,7 @@ export class Mt5Base extends EventEmitter {
     this.startBalance = opts.startBalance ?? 10000;
     this.feeRate = Number(opts.feeRate) || 0.00005;
     this.pollMs = Number(opts.pollMs) || 1000;
+    this.volPerTick = Number(opts.volPerTick) || 0.0015; // 合成行情波动率
     this.dataSource = 'connecting'; // 'real' | 'synthetic'
     this.network = 'mt5';
     this.apiUrl = null;
@@ -78,7 +83,12 @@ export class Mt5Base extends EventEmitter {
   _setMarketFromSpec(spec) {
     this._specs = spec;
     const stepPrice = spec.trade_tick_size || spec.point || 0.00001;
-    const price = this._lastKnownPrice || 100; // 由 refreshPrice 覆盖
+    // 初始价格：优先已知价 -> 兜底规格的合理值（按品种）
+    const price = this._lastKnownPrice || FALLBACK_SEEDS[this.symbol] || 100;
+    if (this._lastKnownPrice == null) {
+      this._lastKnownPrice = price;
+      this.prices.set(this._marketId, price);
+    }
     const m = {
       marketId: this._marketId,
       name: this.symbol,
@@ -103,7 +113,7 @@ export class Mt5Base extends EventEmitter {
     return [...this.markets.values()];
   }
 
-  /** 读取实时价格（桥 get_price -> bid/ask 取中价）。离线时返回 null。 */
+  /** 读取实时价格（桥 get_price -> bid/ask 取中价）。离线时生成合成价格兜底。 */
   async refreshPrice() {
     try {
       const t = await this.bridge.call('get_price', { symbol: this.symbol }, 15000);
@@ -118,11 +128,22 @@ export class Mt5Base extends EventEmitter {
         }
         return mid;
       }
-      return null;
     } catch (e) {
       this.lastError = e?.message || String(e);
-      return null;
     }
+    // 终端离线/行情中断：合成价格兜底（随机游走，对齐原版 paper.js）
+    if (this.dataSource === 'synthetic' || this.dataSource === 'connecting') {
+      this.dataSource = 'synthetic';
+      const prev = this._lastKnownPrice ?? this.prices.get(this._marketId) ?? this._specs?.point ?? 100;
+      const seed = this.markets.get(this._marketId)?.lastPrice || prev;
+      const drift = (seed - prev) / seed * 0.02;
+      const shock = (Math.random() * 2 - 1) * this.volPerTick;
+      const next = Math.max(0.0001, prev * (1 + drift + shock));
+      this._lastKnownPrice = next;
+      this.prices.set(this._marketId, next);
+      return next;
+    }
+    return null;
   }
 
   async getPrice(marketId) {
