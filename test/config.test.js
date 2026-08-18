@@ -33,7 +33,7 @@ try {
   process.env.EUR_PLATFORM = 'oanda'; // 预留平台位可被覆盖
   process.env.NAS_SYMBOL = 'SPX500';
   process.env.NAS_MODE = 'live';
-  process.env.MT5_LOGIN = '61564223';
+  process.env.MT5_LOGIN = '12345678';
   process.env.MT5_SERVER = 'Pepperstone-Demo';
   process.env.GLOBAL_PROXY = 'socks5://u:p@127.0.0.1:1080';
   const c2 = getConfig();
@@ -42,7 +42,7 @@ try {
   assert.equal(c2.slots.eur.platform, 'oanda');
   assert.equal(c2.slots.nas.symbol, 'SPX500');
   assert.equal(c2.slots.nas.mode, 'live');
-  assert.equal(c2.mt5.login, 61564223);
+  assert.equal(c2.mt5.login, 12345678);
   assert.equal(c2.mt5.server, 'Pepperstone-Demo');
   assert.equal(c2.globalProxy, 'socks5://u:p@127.0.0.1:1080');
   // 未单独配置的槽位继承全局代理

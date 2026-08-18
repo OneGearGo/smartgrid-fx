@@ -24,7 +24,7 @@ class FakeBridge extends EventEmitter {
     if (method === 'get_symbols') return [this.symbols[params.symbols[0]]].filter(Boolean);
     if (method === 'get_price') return { bid: this.price.bid, ask: this.price.ask };
     if (method === 'get_candles') return { candles: makeCandles(200, (this.price.bid + this.price.ask) / 2) };
-    if (method === 'get_account') return { login: 61564223, server: 'Fake', balance: 10000, equity: 10000, leverage: 100 };
+    if (method === 'get_account') return { login: 12345678, server: 'Fake', balance: 10000, equity: 10000, leverage: 100 };
     if (method === 'open_orders') return this.orders;
     if (method === 'positions') return this.positions;
     if (method === 'place_limit') {

@@ -5,9 +5,17 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const BRIDGE = path.join(__dirname, '..', 'bridge', 'mt5_bridge.py');const child = spawn('python', [BRIDGE], {
+const BRIDGE = path.join(__dirname, '..', 'bridge', 'mt5_bridge.py');
+// 凭据从环境变量/.env 读取（本仓库不存任何账号信息）
+const child = spawn('python', [BRIDGE], {
   stdio: ['pipe', 'pipe', 'pipe'],
-  env: { ...process.env, MT5_LOGIN: '61564223', MT5_SERVER: 'Pepperstone-Demo', MT5_TERMINAL: 'F:\\MT5\\terminal64.exe' },
+  env: {
+    ...process.env,
+    MT5_LOGIN: process.env.MT5_LOGIN || '',
+    MT5_SERVER: process.env.MT5_SERVER || '',
+    MT5_PASSWORD: process.env.MT5_PASSWORD || '',
+    MT5_TERMINAL: process.env.MT5_TERMINAL || 'F:\\MT5\\terminal64.exe',
+  },
 });
 
 let buffer = '';
