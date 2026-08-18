@@ -79,6 +79,11 @@ export function getConfig() {
       password: process.env.MT5_PASSWORD || '',
       server: process.env.MT5_SERVER || '',
       python: process.env.MT5_PYTHON || '',
+      // 桥接方式：'python'=MetaTrader5 库（依赖终端 IPC，多终端时会端口冲突）
+      //           'ea'=MQL5 桥 EA（WebRequest 走本地 HTTP，绕开 IPC 端口冲突）
+      bridge: (process.env.MT5_BRIDGE || 'python').toLowerCase(),
+      // EA 桥配置
+      eaPort: Number(process.env.EA_BRIDGE_PORT || 8383),
       // 行情轮询间隔（毫秒）：驱动模拟撮合/网格价格
       pollMs: Number(process.env.MT5_POLL_MS || 1000),
       // 初始化失败重试（终端被回测占用时）

@@ -81,12 +81,21 @@ F:\fx-grid-bot\
 ### 行情/订单链路
 
 ```
-MT5 终端 ──(Python MetaTrader5 库)──> mt5_bridge.py ──(stdio JSON-lines)──> Node 适配器 ──> GridBot 引擎 ──> REST/SSE ──> 浏览器
+MT5 终端 ──(Python MetaTrader5 库 或 MQL5 桥 EA)──> 桥 ──> Node 适配器 ──> GridBot 引擎 ──> REST/SSE ──> 浏览器
 ```
 
 - **paper 模式**：MT5 真实行情（K线/价格）+ 本地模拟撮合（含手续费），不产生真实订单；
-- **live 模式**：MT5 真实行情 + 真实挂单/平仓（`order_send`），成交检测靠轮询对账；
+- **live 模式**：MT5 真实行情 + 真实挂单/平仓，成交检测靠轮询对账；
 - 终端离线（如回测/未打开）时自动降级为合成行情并持续重试，恢复后自动切回真实行情。
+
+### 两种 MT5 桥接方式（.env 的 `MT5_BRIDGE`）
+
+| 方式 | 原理 | 适用 |
+| --- | --- | --- |
+| `python`（默认） | MetaTrader5 Python 库，依赖终端 IPC dispatcher（端口 22346） | 单终端环境 |
+| `ea`（推荐多终端） | MQL5 桥 EA 在终端进程内跑，WebRequest 走本地 HTTP（8383） | **同一台电脑有实盘+模拟两个 MT5 终端时必选**（IPC 端口只能被一个终端占用） |
+
+EA 桥模式部署：见 [docs/MT5桥EA部署指南.md](docs/MT5桥EA部署指南.md)（拖 EA 到图表 + 白名单 + 开自动交易，一次性操作）。
 
 ## 对接更多外汇平台（预留位）
 

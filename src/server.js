@@ -461,9 +461,16 @@ await Promise.all(SLOT_ORDER.map((key) => initSlot(exchanges[key], SLOT_NAMES[ke
 // 预检查：共享桥是否连上 MT5
 const bridgeStatus = sharedBridge.connected;
 if (!bridgeStatus) {
-  console.warn('\n[MT5] ⚠ 当前未能连接 MT5 终端（可能正在回测或终端未打开）。');
-  console.warn('[MT5]   桥会在后台持续重试，行情将暂时使用合成数据；');
-  console.warn('[MT5]   终端空闲后会自动切换到真实行情，无需重启本程序。\n');
+  if (cfg.mt5.bridge === 'ea') {
+    console.warn('\n[MT5-EA桥] ⚠ 等待 MQL5 桥 EA 上报（当前未收到 /state）。');
+    console.warn('[MT5-EA桥]   请确认：1) F:\\MT5 已把 fxgrid_mt5_bridge_ea 拖到图表并启用自动交易；');
+    console.warn('[MT5-EA桥]   2) 工具->选项->EA交易->WebRequest允许列表 已添加 http://127.0.0.1:' + cfg.mt5.eaPort + '；');
+    console.warn('[MT5-EA桥]   3) EA 日志显示 "started"。收到上报后自动切到真实行情。\n');
+  } else {
+    console.warn('\n[MT5] ⚠ 当前未能连接 MT5 终端（可能正在回测或终端未打开）。');
+    console.warn('[MT5]   桥会在后台持续重试，行情将暂时使用合成数据；');
+    console.warn('[MT5]   终端空闲后会自动切换到真实行情，无需重启本程序。\n');
+  }
 }
 
 // ── 启动横幅 ──────────────────────────────────────────────────────────────────

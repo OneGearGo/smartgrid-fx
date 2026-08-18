@@ -60,24 +60,30 @@ export class Mt5Base extends EventEmitter {
 
   /** 从桥读取品种规格 + 价格，构建 markets 表。终端离线时用兜底规格 + 合成行情。 */
   async refreshMarket() {
+    let specs = null;
+    let priceOk = false;
     try {
-      const specs = await this.bridge.call('get_symbols', { symbols: [this.symbol] }, 30000);
-      if (specs && specs.length) {
-        this._specs = specs[0];
-        this.dataSource = 'real';
-        this.network = 'mt5';
-        this._setMarketFromSpec(this._specs);
-        this.lastError = null;
-        return;
-      }
+      specs = await this.bridge.call('get_symbols', { symbols: [this.symbol] }, 30000);
+      // 有真实价格 = 行情通道已通（即使规格缺失，如 EA 桥模式）
+      const px = await this.bridge.call('get_price', { symbol: this.symbol }, 15000).catch(() => null);
+      priceOk = !!(px && Number.isFinite(px.bid) && px.bid > 0);
     } catch (e) {
       this.lastError = e?.message || String(e);
     }
-    // 终端离线：兜底规格 + 合成行情
-    this.dataSource = 'synthetic';
+    if (specs && specs.length) {
+      // 桥提供规格（Python 桥）：真实行情 + 真实规格
+      this._specs = specs[0];
+      this.dataSource = 'real';
+      this.network = 'mt5';
+      this._setMarketFromSpec(this._specs);
+      this.lastError = null;
+      return;
+    }
+    // 兜底规格（digits/step 等品种参数），行情通道由价格探测决定
     this._setMarketFromSpec(FALLBACK_SPECS[this.symbol] || {
       digits: 5, point: 0.00001, volume_min: 0.01, volume_step: 0.01, spread: 10, trade_tick_size: 0.00001,
     });
+    this.dataSource = priceOk ? 'real' : 'synthetic';
   }
 
   _setMarketFromSpec(spec) {
