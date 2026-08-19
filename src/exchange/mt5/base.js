@@ -215,18 +215,39 @@ export class Mt5Base extends EventEmitter {
   /** 子类实现：每个价格 tick 的撮合/处理。 */
   _onPriceTick(_price) { /* override */ }
 
-  /** 刷新账户信息（余额/权益）。live 模式从桥读；paper 用本地模拟值。 */
+  /** 刷新账户信息（余额/权益/盈亏）。live 模式从桥读 MT5 权威值。 */
   async refreshAccount() {
     try {
       const a = await this.bridge.call('get_account', {}, 15000);
       if (a && Number.isFinite(a.equity)) {
         this._account = a;
-        this.balance = a.balance;
-        this.equity = a.equity;
+        this.balance = Number(a.balance);
+        this.equity = Number(a.equity);
         this.leverage = a.leverage;
         this.lastOkAt = Date.now();
+        // 账户初始余额基线：EA 首次上报真实值后锁定（live 盈亏起点）
+        if (this._baseBalance == null && Number.isFinite(this.balance) && this.balance > 0) {
+          this._baseBalance = this.balance;
+        }
+        // MT5 权威盈亏（EA 上报）：profit = 持仓浮动盈亏
+        if (Number.isFinite(Number(a.profit))) {
+          this._accountProfit = Number(a.profit);
+          this.unrealizedPnl = Number(a.profit);
+        }
+        // 已实现盈亏 = 余额 - 初始余额（live 模式账户级）
+        if (this._baseBalance != null && Number.isFinite(this._baseBalance)) {
+          this.realizedPnl = this.balance - this._baseBalance;
+        }
       }
     } catch { /* keep cached */ }
+  }
+
+  /** 记录账户初始余额基线（live 模式盈亏计算的起点）。 */
+  setBaseBalance() {
+    if (this._baseBalance == null && Number.isFinite(this.balance) && this.balance > 0) {
+      this._baseBalance = this.balance;
+    }
+    return this._baseBalance;
   }
 }
 

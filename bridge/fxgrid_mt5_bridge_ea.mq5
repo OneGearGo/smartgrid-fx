@@ -288,6 +288,7 @@ string BuildStateJson()
    double equity  = AccountInfoDouble(ACCOUNT_EQUITY);
    double margin  = AccountInfoDouble(ACCOUNT_MARGIN);
    double free    = AccountInfoDouble(ACCOUNT_MARGIN_FREE);
+   double profit  = AccountInfoDouble(ACCOUNT_PROFIT);   // 持仓浮动盈亏(账户级)
    long   login   = AccountInfoInteger(ACCOUNT_LOGIN);
    string server  = AccountInfoString(ACCOUNT_SERVER);
    long   leverage= AccountInfoInteger(ACCOUNT_LEVERAGE);
@@ -298,6 +299,7 @@ string BuildStateJson()
    s += ",\"server\":\"" + server + "\"";
    s += ",\"balance\":" + DoubleToString(balance, 2);
    s += ",\"equity\":" + DoubleToString(equity, 2);
+   s += ",\"profit\":" + DoubleToString(profit, 2);
    s += ",\"margin\":" + DoubleToString(margin, 2);
    s += ",\"margin_free\":" + DoubleToString(free, 2);
    s += ",\"leverage\":" + IntegerToString(leverage);

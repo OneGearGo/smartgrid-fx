@@ -1470,7 +1470,11 @@ export class GridBot {
     const openByLevel = {};
     for (const o of this.active.values()) openByLevel[o.levelIndex] = o.side;
 
-    const unrealizedRaw = pos ? Number(pos.unrealizedPnl) : 0;
+    // LIVE 模式：unrealized 用账户级权威值（EA 上报的全账户浮动盈亏）；
+    // PAPER 模式：用本品种模拟持仓的浮动盈亏。
+    const unrealizedRaw = (this.ex.mode === 'live' && Number.isFinite(this.ex.unrealizedPnl))
+      ? Number(this.ex.unrealizedPnl)
+      : (pos ? Number(pos.unrealizedPnl) : 0);
     const unrealized = round2(unrealizedRaw);
     const balance = typeof this.ex.balance === 'number' ? round2(this.ex.balance) : null;
     const equityRaw = typeof this.ex.equity === 'number' ? this.ex.equity

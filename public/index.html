@@ -2226,20 +2226,24 @@ function renderOverview(data) {
     const mode = d.mode === 'live' ? 'live' : 'paper';
     const sum = totals[mode];
     sum.exchanges.push(exchangeNames[p]);
-    // 品种级指标：各槽位独立（盈亏/成交量/完成格数），相加
-    ['totalPnl','realizedPnl','unrealizedPnl','volume'].forEach(field => {
-      if (d[field] != null && Number.isFinite(Number(d[field]))) {
-        sum[field] += Number(d[field]);
-        sum.known[field] = true;
+    if (mode === 'live') {
+      // LIVE：5 槽位共享同一 MT5 账户，盈亏/余额/权益都是账户级，只能计一次
+      for (const field of ['balance', 'equity', 'totalPnl', 'realizedPnl', 'unrealizedPnl']) {
+        if (!sum.known[field] && d[field] != null && Number.isFinite(Number(d[field]))) {
+          sum[field] = Number(d[field]);
+          sum.known[field] = true;
+        }
       }
-    });
-    // 账户级指标：5 槽位共享同一个 MT5 账户，balance/equity 只能计一次
-    // （取第一个有效值，避免账户余额被重复相加 5 倍）
-    for (const field of ['balance', 'equity']) {
-      if (!sum.known[field] && d[field] != null && Number.isFinite(Number(d[field]))) {
-        sum[field] = Number(d[field]);
-        sum.known[field] = true;
-      }
+      // 成交量/完成格数是品种级，相加
+      if (d.volume != null && Number.isFinite(Number(d.volume))) { sum.volume += Number(d.volume); sum.known.volume = true; }
+    } else {
+      // PAPER：各槽位独立模拟账本，盈亏/余额/权益/成交量都可相加
+      ['balance','equity','totalPnl','realizedPnl','unrealizedPnl','volume'].forEach(field => {
+        if (d[field] != null && Number.isFinite(Number(d[field]))) {
+          sum[field] += Number(d[field]);
+          sum.known[field] = true;
+        }
+      });
     }
     const completedRungs = Number(d.completedRungs ?? d.stats?.completedRungs ?? 0);
     sum.completedRungs += Number.isFinite(completedRungs) ? completedRungs : 0;

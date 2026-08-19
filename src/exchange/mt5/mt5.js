@@ -22,6 +22,9 @@ export class LiveMt5 extends Mt5Base {
   async init() {
     await this.refreshMarket();
     await this.refreshAccount();
+    // 账户初始余额基线（live 盈亏计算起点）：EA 上报后取真实值
+    this.setBaseBalance();
+    this.startBalance = this._baseBalance ?? this.balance;
     await this.refreshPrice();
     // 同步一次真实挂单到跟踪表（续跑/对账的基础）
     await this._diffOrders().catch(() => {});
