@@ -242,9 +242,11 @@ export class Mt5Base extends EventEmitter {
     } catch { /* keep cached */ }
   }
 
-  /** 记录账户初始余额基线（live 模式盈亏计算的起点）。 */
+  /** 记录账户初始余额基线（live 模式盈亏计算的起点）。
+   *  只在拿到 EA 真实账户数据后锁定；启动初期 EA 未上报时用兜底
+   *  余额(如 PAPER_BALANCE=10000)会污染基线，故要求 _account 非空。 */
   setBaseBalance() {
-    if (this._baseBalance == null && Number.isFinite(this.balance) && this.balance > 0) {
+    if (this._baseBalance == null && this._account && Number.isFinite(this.balance) && this.balance > 0) {
       this._baseBalance = this.balance;
     }
     return this._baseBalance;

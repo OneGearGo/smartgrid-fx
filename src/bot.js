@@ -363,10 +363,13 @@ export class GridBot {
 
     // record the starting equity up front (margin pre-check, returnPct, recovery)
     if (this.startBalance == null) {
+      // live 模式优先用账户真实初始余额（EA 上报后锁定），
+      // 避免启动瞬间 EA 未上报时把 PAPER_BALANCE 兜底值当基线
       this.startBalance =
-        typeof this.ex.equity === 'number' ? this.ex.equity
-        : typeof this.ex.balance === 'number' ? this.ex.balance
-        : null;
+        (this.ex.mode === 'live' && Number.isFinite(this.ex._baseBalance))
+          ? this.ex._baseBalance
+          : (typeof this.ex.equity === 'number' ? this.ex.equity
+            : typeof this.ex.balance === 'number' ? this.ex.balance : null);
     }
 
     // ---- margin pre-check ----
