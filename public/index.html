@@ -613,9 +613,9 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     </div>
   </div>
 
-  <!-- AI 市况分析（BTC，定时报告） -->
+  <!-- AI 市况分析（XAUUSD 等外汇品种，定时报告） -->
   <div class="panel" style="margin-top:14px">
-    <div class="panel-title">🤖 AI 市况分析 · BTC<span id="ov-ai-mkt-time" class="muted" style="font-size:11px;margin-left:10px;font-weight:400"></span></div>
+    <div class="panel-title">🤖 AI 市况分析 · XAUUSD<span id="ov-ai-mkt-time" class="muted" style="font-size:11px;margin-left:10px;font-weight:400"></span></div>
     <div id="ov-ai-market" class="ai-box muted">等待首次分析…（需先在「🤖 AI助手」页配置 API Key）</div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-ghost" style="margin:0;width:auto;padding:6px 16px;font-size:12px" onclick="aiMarketRun(this)">立即分析</button>
@@ -2539,7 +2539,7 @@ async function aiRefreshStatus() {
       badge.innerHTML = '';
       $('ai-sentinel-box').textContent = '巡检出错：' + s.sentinelError;
     }
-    // ── 总览页：BTC 市况报告 + 各所哨兵报告 ──
+    // ── 总览页：外汇市况报告 + 各品种哨兵报告 ──
     if ($('ov-ai-market')) {
       if (s.market) {
         $('ov-ai-mkt-time').textContent = `分析时间 ${aiFmtTime(s.market.t)} · 数据源 ${s.market.source || ''} · 每 ${s.marketMin} 分钟自动更新`;
