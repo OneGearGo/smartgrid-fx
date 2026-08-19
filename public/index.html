@@ -693,7 +693,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="eur-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
-        <div><label>杠杆 (x)</label><input id="eur-leverage" type="number" value="100" min="1"></div>
+        <div><label>杠杆 (x)</label><select id="eur-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
           <select id="eur-auto-stop">
@@ -821,7 +821,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="gbp-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
-        <div><label>杠杆 (x)</label><input id="gbp-leverage" type="number" value="100" min="1"></div>
+        <div><label>杠杆 (x)</label><select id="gbp-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
           <select id="gbp-auto-stop">
@@ -947,7 +947,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="jpy-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
-        <div><label>杠杆 (x)</label><input id="jpy-leverage" type="number" value="100" min="1"></div>
+        <div><label>杠杆 (x)</label><select id="jpy-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
           <select id="jpy-auto-stop">
@@ -1073,7 +1073,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="xau-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
-        <div><label>杠杆 (x)</label><input id="xau-leverage" type="number" value="100" min="1"></div>
+        <div><label>杠杆 (x)</label><select id="xau-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
           <select id="xau-auto-stop">
@@ -1174,7 +1174,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <button class="btn btn-smart" id="nas-smart-fill">🎯 智能填充参数</button><div class="muted" id="nas-smart-note" style="margin:5px 0 2px"></div>
       <div class="row"><div><label>下边界</label><input id="nas-lower" type="number" step="any"></div><div><label>上边界</label><input id="nas-upper" type="number" step="any"></div></div>
       <div class="row"><div><label>网格数量</label><input id="nas-grid-count" type="number" value="20" min="2"></div><div><label>每格数量(币)</label><input id="nas-size-base" type="number" step="any" value="0.001"></div></div>
-      <div class="row"><div><label>杠杆 (x)</label><input id="nas-leverage" type="number" value="100" min="1"></div><div><label>区间外止损策略</label><select id="nas-auto-stop"><option value="close" selected>冲破区间平仓</option><option value="recover">只减仓回收阶梯</option></select></div></div>
+      <div class="row"><div><label>杠杆 (x)</label><select id="nas-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div><div><label>区间外止损策略</label><select id="nas-auto-stop"><option value="close" selected>冲破区间平仓</option><option value="recover">只减仓回收阶梯</option></select></div></div>
       <div class="risk-preview" id="nas-risk-preview"></div>
       <button class="btn btn-start" id="nas-start-btn">启动 NAS100 网格</button>
       <button class="btn btn-stop" id="nas-stop-btn" disabled>停止 + 撤单 + 平仓</button>
@@ -1656,17 +1656,13 @@ function makeExchangeCtrl(prefix, chartId) {
     let n = Math.round(((hi-lo)/p*100)/targetSpacingPct);
     n = Math.min(50, Math.max(10, n));
     P('grid-count').value = n;
-    const lev = atrPct > 3 ? r.lev.hi : atrPct > 1.5 ? r.lev.mid : r.lev.lo;
-    // 外汇/CFD 合约规模巨大（1手=10万/100盎司），保守杠杆(2-8x)会让 0.01 手
-    // 网格在正常余额下必然保证金不足。推荐逻辑采用 MT5 账户常见杠杆 100，
-    // 且若用户已手动改过杠杆则不覆盖（尊重手动设置）。
-    const manual = P('leverage').dataset.manual === '1';
-    if (!manual) P('leverage').value = 100;
-    else P('leverage').value = Math.max(+P('leverage').value || 100, 1);
-    autoSizePerGrid(p, +P('leverage').value);
+    // 杠杆是 MT5 账户级固定档位(100/200/500/1000)，推荐策略不覆盖用户选择；
+    // 手数按当前杠杆和外汇合约规模计算(见 autoSizePerGrid)。
+    const lev = +P('leverage').value || 200;
+    autoSizePerGrid(p, lev);
     updateRiskPreview();
     const modeTxt = curTrend.recommended === 'long' ? '做多' : curTrend.recommended === 'short' ? '做空' : '中性';
-    P('smart-note').innerHTML = `✅ [${riskProfile === 'aggressive' ? '激进' : '稳健'}] <b>${modeTxt}网格</b> · ${P('grid-count').value} 格 · ${P('leverage').value}x`;
+    P('smart-note').innerHTML = `✅ [${riskProfile === 'aggressive' ? '激进' : '稳健'}] <b>${modeTxt}网格</b> · ${P('grid-count').value} 格 · ${lev}x`;
   }
 
   function setMode(mode) {

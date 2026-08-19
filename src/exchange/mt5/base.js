@@ -185,7 +185,14 @@ export class Mt5Base extends EventEmitter {
     return synthCandles(this.prices.get(Number(marketId)) || this._lastKnownPrice || 100, n);
   }
 
-  async setLeverage() { return false; } // MT5 杠杆是账户级，无法按品种设置
+    /**
+   * MT5 杠杆是账户级固定档位（100/200/500/1000），在经纪商主页设置，
+   * 无法按品种设置，也没有程序端设置接口。程序里填的杠杆仅用于本地
+   * 保证金预检（margin pre-check），实际交易按账户杠杆执行——
+   * 因此这里返回 true（视为"已按账户杠杆生效"），避免 bot 误报
+   * "杠杆未生效"告警。
+   */
+  async setLeverage() { return true; }
 
   /** 启动价格轮询。 */
   start() {

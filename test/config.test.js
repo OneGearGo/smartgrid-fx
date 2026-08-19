@@ -10,6 +10,8 @@ const previous = Object.fromEntries(envNames.map((name) => [name, process.env[na
 
 try {
   for (const name of envNames) delete process.env[name];
+  // 确保测试环境干净（.env 里可能是 live，测试要测默认 paper）
+  for (const key of ['EUR', 'GBP', 'JPY', 'XAU', 'NAS']) process.env[`${key}_MODE`] = 'paper';
 
   // 默认值
   const cfg = getConfig();
@@ -52,6 +54,7 @@ try {
     if (previous[name] === undefined) delete process.env[name];
     else process.env[name] = previous[name];
   }
+  for (const key of ['EUR', 'GBP', 'JPY', 'XAU', 'NAS']) delete process.env[`${key}_MODE`];
 }
 
 console.log('config tests passed');

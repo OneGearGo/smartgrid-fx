@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SERVER = path.join(__dirname, '..', 'src', 'server.js');
-const PORT = 8284;
+// 随机测试端口，避免与正在运行的程序(8284)冲突
+const PORT = 8400 + Math.floor(Math.random() * 50);
 const BASE = `http://127.0.0.1:${PORT}`;
 
 let passed = 0, failed = 0;
@@ -20,9 +21,14 @@ const post = (url, body) => fetch(BASE + url, { method: 'POST', headers: { 'Cont
 const get = (url) => fetch(BASE + url).then((r) => r.json());
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 启动服务器（禁用浏览器/不阻塞）
+// 启动服务器（禁用浏览器/不阻塞；强制 paper 环境，隔离 .env 的 live 配置）
 const server = spawn('node', [SERVER], {
-  env: { ...process.env, PORT: String(PORT) },
+  env: {
+    ...process.env,
+    PORT: String(PORT),
+    EUR_MODE: 'paper', GBP_MODE: 'paper', JPY_MODE: 'paper', XAU_MODE: 'paper', NAS_MODE: 'paper',
+    MT5_BRIDGE: 'python', // 测试用 Python 桥（离线自动合成行情），不依赖 EA
+  },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let serverLog = '';
