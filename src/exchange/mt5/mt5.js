@@ -128,13 +128,27 @@ export class LiveMt5 extends Mt5Base {
 
   getPosition(marketId) {
     const mId = Number(marketId);
-    const pos = (this._posCache || []).find((p) => p.symbol === this.symbol);
-    if (!pos || Number(pos.volume) === 0) return null;
-    const unrealizedPnl = Number(pos.profit) + Number(pos.swap || 0);
+    const all = (this._posCache || []).filter((p) => p.symbol === this.symbol);
+    if (!all.length) return null;
+    // 合并该品种全部持仓（Hedge 模式每笔独立，网格可能成交多笔）：
+    //  - sizeBase 带方向累加（0=buy 多, 1=sell 空）
+    //  - 浮盈/浮亏累加
+    //  - entryPrice 按持仓量加权平均
+    let sizeBase = 0, unrealizedPnl = 0, weighted = 0, totalVol = 0;
+    for (const pos of all) {
+      const vol = Number(pos.volume) || 0;
+      if (vol === 0) continue;
+      const signed = pos.type === 0 ? vol : -vol;
+      sizeBase += signed;
+      unrealizedPnl += Number(pos.profit) + Number(pos.swap || 0);
+      weighted += Math.abs(signed) * Number(pos.price_open);
+      totalVol += Math.abs(signed);
+    }
+    if (totalVol === 0) return null;
     return {
-      sizeBase: Number(pos.volume) * (pos.type === 0 ? 1 : -1), // 0=buy,1=sell
-      entryPrice: Number(pos.price_open),
-      unrealizedPnl,
+      sizeBase: round6(sizeBase),
+      entryPrice: weighted / totalVol,
+      unrealizedPnl: round2(unrealizedPnl),
       leverage: this.leverage ?? null,
       liquidationPrice: null,
     };
@@ -206,3 +220,6 @@ export class LiveMt5 extends Mt5Base {
     } catch { return null; }
   }
 }
+
+function round2(x) { return Math.round(x * 100) / 100; }
+function round6(x) { return Math.round(x * 1e6) / 1e6; }

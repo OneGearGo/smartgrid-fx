@@ -229,10 +229,11 @@ export class Mt5Base extends EventEmitter {
         if (this._baseBalance == null && Number.isFinite(this.balance) && this.balance > 0) {
           this._baseBalance = this.balance;
         }
-        // MT5 权威盈亏（EA 上报）：profit = 持仓浮动盈亏
+        // MT5 权威账户浮盈（EA 上报 profit=账户所有持仓浮动盈亏）——
+        // 仅存 _accountProfit 供总览账户级汇总用；不要覆盖 this.unrealizedPnl
+        // （那是品种级，由各品种持仓 position 计算，见 bot.getState）。
         if (Number.isFinite(Number(a.profit))) {
           this._accountProfit = Number(a.profit);
-          this.unrealizedPnl = Number(a.profit);
         }
         // 已实现盈亏 = 余额 - 初始余额（live 模式账户级）
         if (this._baseBalance != null && Number.isFinite(this._baseBalance)) {
