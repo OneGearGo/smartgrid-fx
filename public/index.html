@@ -2223,12 +2223,21 @@ function renderOverview(data) {
     const mode = d.mode === 'live' ? 'live' : 'paper';
     const sum = totals[mode];
     sum.exchanges.push(exchangeNames[p]);
-    ['equity','balance','totalPnl','realizedPnl','unrealizedPnl','volume'].forEach(field => {
+    // 品种级指标：各槽位独立（盈亏/成交量/完成格数），相加
+    ['totalPnl','realizedPnl','unrealizedPnl','volume'].forEach(field => {
       if (d[field] != null && Number.isFinite(Number(d[field]))) {
         sum[field] += Number(d[field]);
         sum.known[field] = true;
       }
     });
+    // 账户级指标：5 槽位共享同一个 MT5 账户，balance/equity 只能计一次
+    // （取第一个有效值，避免账户余额被重复相加 5 倍）
+    for (const field of ['balance', 'equity']) {
+      if (!sum.known[field] && d[field] != null && Number.isFinite(Number(d[field]))) {
+        sum[field] = Number(d[field]);
+        sum.known[field] = true;
+      }
+    }
     const completedRungs = Number(d.completedRungs ?? d.stats?.completedRungs ?? 0);
     sum.completedRungs += Number.isFinite(completedRungs) ? completedRungs : 0;
 
