@@ -2227,12 +2227,23 @@ function renderOverview(data) {
     const sum = totals[mode];
     sum.exchanges.push(exchangeNames[p]);
     if (mode === 'live') {
-      // LIVE：5 槽位共享同一 MT5 账户，盈亏/余额/权益都是账户级，只能计一次
-      for (const field of ['balance', 'equity', 'totalPnl', 'realizedPnl', 'unrealizedPnl']) {
+      // LIVE：5 槽位共享同一 MT5 账户
+      //  - balance/equity/realizedPnl 账户级，只计一次
+      //  - unrealized 用 accountProfit（EA 上报的账户整体浮盈），只计一次
+      //  - totalPnl = realized + accountProfit（账户整体盈亏）
+      for (const field of ['balance', 'equity', 'realizedPnl']) {
         if (!sum.known[field] && d[field] != null && Number.isFinite(Number(d[field]))) {
           sum[field] = Number(d[field]);
           sum.known[field] = true;
         }
+      }
+      if (!sum.known.unrealizedPnl && d.accountProfit != null && Number.isFinite(Number(d.accountProfit))) {
+        sum.unrealizedPnl = Number(d.accountProfit);
+        sum.known.unrealizedPnl = true;
+      }
+      if (sum.known.realizedPnl && sum.known.unrealizedPnl) {
+        sum.totalPnl = sum.realizedPnl + sum.unrealizedPnl;
+        sum.known.totalPnl = true;
       }
       // 成交量/完成格数是品种级，相加
       if (d.volume != null && Number.isFinite(Number(d.volume))) { sum.volume += Number(d.volume); sum.known.volume = true; }

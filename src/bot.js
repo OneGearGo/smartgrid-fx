@@ -1473,11 +1473,9 @@ export class GridBot {
     const openByLevel = {};
     for (const o of this.active.values()) openByLevel[o.levelIndex] = o.side;
 
-    // LIVE 模式：unrealized 用账户级权威值（EA 上报的全账户浮动盈亏）；
-    // PAPER 模式：用本品种模拟持仓的浮动盈亏。
-    const unrealizedRaw = (this.ex.mode === 'live' && Number.isFinite(this.ex.unrealizedPnl))
-      ? Number(this.ex.unrealizedPnl)
-      : (pos ? Number(pos.unrealizedPnl) : 0);
+    // 品种卡片显示本品种持仓浮盈（EA positions 按品种有 profit）；
+    // 账户级权威浮盈(ex._accountProfit)单独暴露，供总览汇总使用。
+    const unrealizedRaw = pos ? Number(pos.unrealizedPnl) : 0;
     const unrealized = round2(unrealizedRaw);
     const balance = typeof this.ex.balance === 'number' ? round2(this.ex.balance) : null;
     const equityRaw = typeof this.ex.equity === 'number' ? this.ex.equity
@@ -1525,6 +1523,9 @@ export class GridBot {
       } : null,
       operationalIssue: this.ex.operationalIssue ?? null,
       apiWalletAddress: this.ex.apiWalletAddress ?? null,
+      // 账户级权威浮盈（EA 上报 ACCOUNT_PROFIT，5 槽位共享同一 MT5 账户时为同一值），
+      // 供总览汇总显示账户整体盈亏（品种卡片用 unrealizedPnl 显示各自持仓浮盈）
+      accountProfit: Number.isFinite(this.ex._accountProfit) ? round2(this.ex._accountProfit) : null,
       realizedPnl: realized,
       unrealizedPnl: unrealized,
       totalPnl,

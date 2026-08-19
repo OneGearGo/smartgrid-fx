@@ -415,6 +415,7 @@ function pick(s, mode, key) {
     totalPnl: s.totalPnl,
     realizedPnl: s.realizedPnl,
     unrealizedPnl: s.unrealizedPnl,
+    accountProfit: s.accountProfit ?? null,
     returnPct: s.returnPct,
     volume: s.volume,
     completedRungs: s.stats?.completedRungs ?? 0,
