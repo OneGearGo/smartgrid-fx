@@ -132,6 +132,15 @@ export class EaBridgeServer extends EventEmitter {
   // ── GET /cmd：下发待执行命令 ─────────────────────────────────────────
   _onCmd(req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    // EA 失联保护：超过 30 秒没有 /state 上报，说明 EA 不在运行（被移除/崩溃）。
+    // 此时不应下发任何命令（挂单/撤单都会石沉大海），返回 NONE 让队列保留
+    // 并尽快失败，避免命令积压造成 stop 卡死。
+    const stale = this.lastStateAt && Date.now() - this.lastStateAt > 30000;
+    if (stale) {
+      this.connected = false;
+      res.end('NONE');
+      return;
+    }
     // 先取一个排队命令
     if (this._pendingCmd) {
       // 上一个命令还没回报——暂时没有可执行的（避免并发）
