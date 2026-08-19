@@ -493,6 +493,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div id="ov-eur-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
       <div id="ov-eur-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
       <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="reconnectEx('eur', this)">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="adoptEx('eur', this)">📥 重新接管仓位</button>
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('eur')">进入 EURUSD 控制台 →</button>
     </div>
 
@@ -522,6 +523,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div id="ov-gbp-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
       <div id="ov-gbp-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
       <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="reconnectEx('gbp', this)">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="adoptEx('gbp', this)">📥 重新接管仓位</button>
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('gbp')">进入 GBPUSD 控制台 →</button>
     </div>
 
@@ -551,6 +553,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div id="ov-jpy-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
       <div id="ov-jpy-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
       <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="reconnectEx('jpy', this)">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="adoptEx('jpy', this)">📥 重新接管仓位</button>
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('jpy')">进入 USDJPY 控制台 →</button>
     </div>
 
@@ -580,6 +583,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div id="ov-xau-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
       <div id="ov-xau-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
       <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="reconnectEx('xau', this)">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="adoptEx('xau', this)">📥 重新接管仓位</button>
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('xau')">进入 XAUUSD 控制台 →</button>
     </div>
 
@@ -609,6 +613,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div id="ov-nas-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
       <div id="ov-nas-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
       <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="reconnectEx('nas', this)">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="adoptEx('nas', this)">📥 重新接管仓位</button>
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('nas')">进入 NAS100 控制台 →</button>
     </div>
   </div>
@@ -740,6 +745,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="eur-st-orders">—</span></div>
       <button class="btn btn-ghost" id="eur-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button>
       <button class="btn btn-ghost" id="eur-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" id="eur-adopt-btn" style="margin-top:8px;font-size:12px">📥 重新接管仓位</button>
     </div>
     <div class="panel" style="margin-bottom:14px">
       <div class="panel-title">价格 / 网格</div>
@@ -866,6 +872,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="gbp-st-orders">—</span></div>
       <button class="btn btn-ghost" id="gbp-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button>
       <button class="btn btn-ghost" id="gbp-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" id="gbp-adopt-btn" style="margin-top:8px;font-size:12px">📥 重新接管仓位</button>
     </div>
     <div class="panel" style="margin-bottom:14px">
       <div class="panel-title">价格 / 网格</div>
@@ -992,6 +999,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="jpy-st-orders">—</span></div>
       <button class="btn btn-ghost" id="jpy-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button>
       <button class="btn btn-ghost" id="jpy-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" id="jpy-adopt-btn" style="margin-top:8px;font-size:12px">📥 重新接管仓位</button>
     </div>
     <div class="panel" style="margin-bottom:14px">
       <div class="panel-title">价格 / 网格</div>
@@ -1118,6 +1126,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="xau-st-orders">—</span></div>
       <button class="btn btn-ghost" id="xau-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button>
       <button class="btn btn-ghost" id="xau-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" id="xau-adopt-btn" style="margin-top:8px;font-size:12px">📥 重新接管仓位</button>
     </div>
     <div class="panel" style="margin-bottom:14px">
       <div class="panel-title">价格 / 网格</div>
@@ -1201,6 +1210,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       </div>
       <div class="kv"><span class="lbl">总盈亏 / 收益率</span><span class="val" id="nas-st-total">—</span></div><div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="nas-st-orders">—</span></div>
       <button class="btn btn-ghost" id="nas-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button><button class="btn btn-ghost" id="nas-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
+      <button class="btn btn-ghost" id="nas-adopt-btn" style="margin-top:8px;font-size:12px">📥 重新接管仓位</button>
     </div>
     <div class="panel" style="margin-bottom:14px"><div class="panel-title">价格 / 网格</div><div id="nas-range-warn"></div><div class="chartbox"><canvas id="nas-chart"></canvas></div></div>
     <div class="grid-2" style="gap:14px"><div class="panel"><div class="panel-title">成交记录</div><table><thead><tr><th>时间</th><th>方向</th><th>价格</th><th>数量</th></tr></thead><tbody id="nas-fills"></tbody></table></div><div class="panel"><div class="panel-title">运行日志</div><div class="log" id="nas-alerts"><div class="log-item muted">暂无日志</div></div></div></div>
@@ -1793,6 +1803,7 @@ function makeExchangeCtrl(prefix, chartId) {
   };
 
   if (P('reconnect-btn')) P('reconnect-btn').onclick = () => reconnectEx(prefix, P('reconnect-btn'));
+  if (P('adopt-btn')) P('adopt-btn').onclick = () => adoptEx(prefix, P('adopt-btn'));
 
   P('cancel-orders-btn').onclick = async () => {
     if (!confirm('确认一键撤销该交易所的全部挂单？\n持仓不受影响（不会平仓）。网格将停止，需要时可重新启动。')) return;
@@ -2176,8 +2187,32 @@ async function reconnectEx(p, btn) {
   }, 2500);
 }
 
-function setExHealth(p, h, connected) {
-  const status = !connected ? 'error' : (h?.status || 'idle');
+// 重新接管仓位：程序重启后把 MT5 上残留的真实挂单/持仓接管回跟踪
+// （优先用快照恢复原网格；快照缺失时从真实挂单反推重建）。
+async function adoptEx(p, btn) {
+  const orig = btn ? btn.textContent : '';
+  setExchangeActionBusy(p, true);
+  if (btn) btn.textContent = '⏳ 接管中…';
+  setActionStatus(p, 'pending', '正在从 MT5 接管残留挂单/持仓（优先快照恢复，无快照则按真实挂单重建）…');
+  try {
+    const j = await apiPost(p, 'adopt');
+    if (j.error) throw new Error(j.error);
+    const state = j.state;
+    setActionStatus(p, 'success', `已接管：跟踪 ${state.openOrders ?? 0} 单，${verifiedOrdersText(state)}。`);
+    if (btn) btn.textContent = '✅ 已接管仓位';
+    const ctrl = ({ eur: eurCtrl, gbp: gbpCtrl, jpy: jpyCtrl, xau: xauCtrl, nas: nasCtrl })[p];
+    if (ctrl) ctrl.render(state);
+  } catch (e) {
+    setActionStatus(p, 'error', `接管失败：${e.message}`);
+    alert(`${p.toUpperCase()} 接管失败：${e.message}\n（若 MT5 上本就没有挂单/持仓，属正常提示）`);
+  }
+  setTimeout(() => {
+    if (btn) btn.textContent = orig;
+    setExchangeActionBusy(p, false);
+  }, 2500);
+}
+
+function setExHealth(p, h, connected) {  const status = !connected ? 'error' : (h?.status || 'idle');
   const reason = !connected ? '后端连接中断，状态未知' : (h?.reason || '未运行');
   const dot = $(`hdr-${p}-dot`);
   if (dot) { dot.className = 'hdot ' + status; dot.title = `${p.toUpperCase()}：${reason}`; }

@@ -170,9 +170,95 @@ export class GridBot {
     return this.getState();
   }
 
+  /**
+   * 重新接管仓位：程序重启后（bot 未运行），把 MT5 上残留的真实挂单和
+   * 持仓接管回跟踪，恢复网格运行。
+   *
+   * 优先用 .state.json 快照 resume（最准确：含原网格配置）；
+   * 快照缺失/过期时，从交易所真实挂单反推网格（价格等距分布）重建。
+   *
+   * @param {object} snap 可选：.state.json 快照
+   * @returns {Promise<object>} bot state
+   */
+  async adoptExistingOrders(snap = null) {
+    if (this.running) throw new Error('已在运行，无需接管。');
+    // 1) 快照优先：完整恢复原网格
+    if (snap?.running && snap?.config) {
+      try {
+        const r = await this.resume(snap);
+        this._alert(`已重新接管 ${this.config.displayName}：从快照恢复网格，接管 ${this.active.size} 个挂单并完成对账。`);
+        return r;
+      } catch (e) {
+        this._alert(`快照恢复失败（${e?.message || e}），尝试从交易所真实挂单重建…`);
+      }
+    }
+    // 2) 无快照/快照失效：从真实挂单反推网格
+    if (typeof this.ex.fetchOpenOrders !== 'function') throw new Error('交易所适配器不支持读取真实挂单，无法接管。');
+    const markets = await this.ex.getMarkets();
+    const market = markets.find((m) => m.marketId === this.ex.marketId) || markets[0];
+    if (!market) throw new Error('找不到市场，无法接管。');
+    const real = await this.ex.fetchOpenOrders(market.marketId);
+    if (!Array.isArray(real)) throw new Error('无法读取交易所真实挂单。');
+    const orders = real.filter((o) => Number.isFinite(Number(o.price)) && Number(o.price) > 0);
+    if (!orders.length) {
+      // 没有挂单：看有没有持仓
+      const pos = this.ex.getPosition?.(market.marketId);
+      if (pos?.sizeBase) {
+        this._alert(`${market.displayName} 无挂单但有持仓（${pos.sizeBase}），可启动「只减仓回收阶梯」处理。`);
+        return this.getState();
+      }
+      throw new Error('交易所上没有任何挂单或持仓，无需接管。');
+    }
+    // 反推网格：价格排序，等距拟合
+    const prices = orders.map((o) => Number(o.price)).sort((a, b) => a - b);
+    const gaps = [];
+    for (let i = 1; i < prices.length; i++) gaps.push(prices[i] - prices[i - 1]);
+    const spacing = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+    if (!(spacing > 0)) throw new Error('无法从挂单价格推断网格间距。');
+    const lower = prices[0], upper = prices[prices.length - 1];
+    // 现价
+    const price = await this.ex.getPrice(market.marketId).catch(() => null);
+    // 中性网格：下方 buy、上方 sell
+    const mode = 'neutral';
+    this.config = {
+      marketId: market.marketId, displayName: market.displayName, mode,
+      lower, upper,
+      gridCount: Math.max(2, prices.length - 1),
+      sizeBase: market.minOrderSize || 0.01,
+      leverage: this.ex.leverage || 100,
+      outOfRangeAction: 'close',
+      stepSize: market.stepSize, stepPrice: market.stepPrice,
+      contractSize: market.contractSize || 1,
+      adopted: true, // 标记为接管重建的网格（非原始配置）
+    };
+    this.grid = buildGrid({ lower, upper, gridCount: this.config.gridCount });
+    this._recomputeRisk();
+    this.lastPrice = price;
+    this.outOfRange = price != null ? (price < lower || price > upper) : false;
+    this.active.clear();
+    // 把真实挂单纳入跟踪（levelIndex 由价格推算）
+    const lvl0 = this.grid.levels[0];
+    for (const o of orders) {
+      const px = Number(o.price);
+      const idx = Math.round((px - lvl0) / spacing);
+      const side = o.side === 'buy' ? 'buy' : 'sell';
+      const closing = mode === 'short' ? side === 'buy' : side === 'sell';
+      try { this.ex.adoptOrder?.({ orderId: String(o.orderId), marketId: market.marketId, levelIndex: idx, side, price: px, sizeBase: this.config.sizeBase }); } catch { /* best effort */ }
+      this.active.set(String(o.orderId), { levelIndex: idx, side, price: px, opening: !closing, recovery: false, placedAt: Date.now() });
+    }
+    this.ex.on('fill', this._onFill);
+    this.ex.on('price', this._onPrice);
+    if (typeof this.ex.start === 'function') this.ex.start();
+    this.running = true;
+    this._startReconcileTimer();
+    this._alert(`${market.displayName}：已从交易所真实挂单接管 ${this.active.size} 单（间距≈${round4(spacing)}），恢复网格运行。`);
+    this.reconcileOpenOrders().catch(() => {});
+    this._changed();
+    return this.getState();
+  }
+
   /** Resume a standalone reduce-only recovery ladder after a process restart. */
-  async _resumeRecovery(snap) {
-    this.config = snap.config;
+  async _resumeRecovery(snap) {    this.config = snap.config;
     this.stats = { buys: 0, sells: 0, completedRungs: 0, gridProfit: 0, volume: 0, ...(snap.stats || {}) };
     this.startBalance = snap.startBalance ?? null;
     this._pnlBase = snap.pnlBase ?? null;
@@ -1544,6 +1630,7 @@ export class GridBot {
 function labelMode(m) { return m === 'long' ? '做多网格' : m === 'short' ? '做空网格' : '中性网格'; }
 
 function round2(x) { return Math.round(x * 100) / 100; }
+function round4(x) { return Math.round(x * 10000) / 10000; }
 function round6(x) { return Math.round(x * 1e6) / 1e6; }
 function roundPrice(x) { return Number.isFinite(Number(x)) ? Math.round(Number(x) * 1e8) / 1e8 : null; }
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }

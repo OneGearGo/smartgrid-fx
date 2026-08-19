@@ -207,6 +207,21 @@ function makeExchangeHandler(prefix, bot, exchange, exCfg, clientSet, name) {
       }
     }
 
+    // 重新接管仓位：程序重启后把 MT5 上残留的真实挂单/持仓接管回来
+    // （优先用快照恢复；快照缺失时从真实挂单反推网格重建）。
+    if (subPath === '/adopt' && req.method === 'POST') {
+      try {
+        const key = prefix.split('/').pop();
+        const snap = loadSnapshot(key);
+        const state = await bot.adoptExistingOrders(snap);
+        // 接管成功即持久化新状态（后续重启可继续用快照恢复）
+        try { saveSnapshot(key, bot.snapshot()); } catch { /* ignore */ }
+        return send(res, 200, { ok: true, state });
+      } catch (e) {
+        return send(res, 400, { error: e?.message || String(e) });
+      }
+    }
+
     if (subPath === '/close-position' && req.method === 'POST') {
       try { const b = await readBody(req); return send(res, 200, await bot.closePositionNow(b && b.marketId)); }
       catch (e) { return send(res, 400, { error: e.message }); }
