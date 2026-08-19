@@ -1677,10 +1677,12 @@ function makeExchangeCtrl(prefix, chartId) {
     if (!mkt || !bal || !price) return;
     const step = mkt.stepSize || 0.0001;
     const minSz = mkt.minOrderSize || step;
+    const cs = mkt.contractSize > 0 ? mkt.contractSize : 1; // 外汇合约规模(1手=100盎司/10万)
     let n = +P('grid-count').value || 20;
     const budgetNotional = bal * lev * (RISK[riskProfile]?.budget || 0.4);
-    let size = Math.floor((budgetNotional / n / price) / step) * step;
-    if (size < minSz) { size = minSz; const maxN = Math.max(2, Math.floor(budgetNotional / (minSz * price))); n = Math.min(n, maxN); P('grid-count').value = n; }
+    // 每格名义 = 手数 × 合约规模 × 价格，故手数 = 预算名义 / 格数 / 合约规模 / 价格
+    let size = Math.floor((budgetNotional / n / cs / price) / step) * step;
+    if (size < minSz) { size = minSz; const maxN = Math.max(2, Math.floor(budgetNotional / (minSz * cs * price))); n = Math.min(n, maxN); P('grid-count').value = n; }
     P('size-base').value = +size.toFixed(8);
   }
 
@@ -1701,9 +1703,11 @@ function makeExchangeCtrl(prefix, chartId) {
     const lo = +P('lower').value, hi = +P('upper').value, n = +P('grid-count').value,
           sz = +P('size-base').value, lev = +P('leverage').value;
     if (!(hi > lo) || !n || !sz) { P('risk-preview').textContent = ''; return; }
+    const mkt = markets.find(m => String(m.marketId) === String(P('market').value));
+    const cs = mkt?.contractSize > 0 ? mkt.contractSize : 1; // 外汇合约规模
     const mid = (lo+hi)/2, spacing = (hi-lo)/n;
-    const notional = n*sz*mid, margin = notional/lev;
-    P('risk-preview').innerHTML = `单格间距 <b>${spacing.toPrecision(4)}</b>（${(spacing/mid*100).toFixed(2)}%）· 每格毛利 <b>${(spacing*sz).toPrecision(3)}</b><br>名义敞口 <b>${notional.toFixed(0)}</b> · 约需保证金 <b>${margin.toFixed(0)}</b> USDC（${lev}x）`;
+    const notional = n*sz*cs*mid, margin = notional/lev;
+    P('risk-preview').innerHTML = `单格间距 <b>${spacing.toPrecision(4)}</b>（${(spacing/mid*100).toFixed(2)}%）· 每格毛利 <b>${(spacing*sz*cs).toPrecision(3)}</b><br>名义敞口 <b>${notional.toFixed(0)}</b> · 约需保证金 <b>${margin.toFixed(0)}</b> USDC（${lev}x）`;
   }
 
   ['lower','upper','grid-count','size-base','leverage'].forEach(id => P(id).addEventListener('input', updateRiskPreview));

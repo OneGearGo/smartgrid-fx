@@ -635,7 +635,7 @@ export class GridBot {
       leverage: this.config.leverage,
       notional: round2(notional),
       requiredMargin: round2(notional / this.config.leverage),
-      perRungProfit: round2(this.grid.spacing * this.config.sizeBase),
+      perRungProfit: round2(this.grid.spacing * this.config.sizeBase * cs),
       spacingPct: round2((this.grid.spacing / mid) * 100),
     };
   }

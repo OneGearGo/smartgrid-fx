@@ -12,11 +12,20 @@ export class PaperMt5 extends Mt5Base {
     this.balance = this.startBalance;
     this.equity = this.startBalance;
     this.realizedPnl = 0;
+    this._paperTraded = false; // 本地是否已发生模拟成交（此后保持本地账本）
   }
 
   async init() {
     await this.refreshMarket();
     await this.refreshPrice();
+    // 若有真实账户信息（EA 桥连着 MT5 账户），用真实余额做保证金预检基准；
+    // 读不到（纯模拟/离线）则用 PAPER_BALANCE 兜底。
+    const acct = await this.bridge.call('get_account', {}, 15000).catch(() => null);
+    if (acct && Number.isFinite(acct.balance) && acct.balance > 0) {
+      this.balance = acct.balance;
+      this.equity = Number.isFinite(acct.equity) && acct.equity > 0 ? acct.equity : acct.balance;
+      this._account = acct;
+    }
     this.start();
     return true;
   }
@@ -113,6 +122,20 @@ export class PaperMt5 extends Mt5Base {
     }
     this.emit('price', { marketId: this._marketId, price: mid });
     this._match(bid, ask);
+    // 周期性刷新真实账户余额（EA 桥模式下预检/显示用真实余额；
+    // 启动初期 EA 未上报时是 PAPER_BALANCE 兜底，收到上报后自动纠正）
+    if (!this._lastAcctAt || Date.now() - this._lastAcctAt > 10000) {
+      this._lastAcctAt = Date.now();
+      const acct = await this.bridge.call('get_account', {}, 15000).catch(() => null);
+      if (acct && Number.isFinite(acct.balance) && acct.balance > 0) {
+        // 只在没有本地模拟盈亏时用真实余额覆盖（有模拟交易后保持本地账本）
+        if (!this._paperTraded) {
+          this.balance = acct.balance;
+          this.equity = Number.isFinite(acct.equity) && acct.equity > 0 ? acct.equity : acct.balance;
+        }
+        this._account = acct;
+      }
+    }
   }
 
   _match(bid, ask) {
@@ -143,6 +166,7 @@ export class PaperMt5 extends Mt5Base {
   }
 
   _applyFill(marketId, side, price, qty) {
+    this._paperTraded = true;
     const fee = price * qty * this.feeRate;
     this.balance -= fee;
     this.realizedPnl -= fee;
