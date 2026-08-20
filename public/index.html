@@ -1429,7 +1429,9 @@ const fmtPrice = (v) => {
 const escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 async function apiPost(prefix, action, body = {}, timeoutMs = 120000) {
-  if (timeoutMs === 120000 && prefix === 'nas' && ['start','adjust','refill'].includes(action)) timeoutMs = 360000;
+  // 启动/调区间/补格需要逐个向 MT5 下发并确认 20 个挂单（EA 桥串行执行，
+  // 单品种可能超过 120 秒），对所有品种统一放宽到 360 秒，避免前端误报超时。
+  if (timeoutMs === 120000 && ['start','adjust','refill'].includes(action)) timeoutMs = 360000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -1447,7 +1449,7 @@ async function apiPost(prefix, action, body = {}, timeoutMs = 120000) {
     return result;
   } catch (error) {
     if (error?.name === 'AbortError') {
-      throw new Error('等待本地程序超过 120 秒。操作可能仍在交易所确认中，请先查看运行状态和真实挂单数，不要重复点击。');
+      throw new Error('等待本地程序超过 360 秒。操作可能仍在交易所确认中，请先查看运行状态和真实挂单数，不要重复点击。');
     }
     if (/failed to fetch/i.test(error?.message || '')) {
       throw new Error('无法连接本地程序（Failed to fetch）。请确认启动窗口仍在运行并刷新网页；操作结果未知时不要重复点击。');
