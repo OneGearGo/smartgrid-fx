@@ -1095,7 +1095,9 @@ export class GridBot {
     const fillSize = Number.isFinite(f.sizeBase) ? f.sizeBase : this.config.sizeBase;
 
     if (f.side === 'buy') this.stats.buys++; else this.stats.sells++;
-    this.stats.volume = round2(this.stats.volume + fillPrice * fillSize);
+    // 累计交易量：MT5 的单位是手（lots），直接累加成交手数。
+    // （加密版原算法是 fillPrice × fillSize 按 USDT 金额计价，不适用于外汇。）
+    this.stats.volume = round2(this.stats.volume + fillSize);
     this.fills.unshift({ t: Date.now(), side: f.side, price: fillPrice, size: fillSize, level: levelIndex });
     if (this.fills.length > 50) this.fills.pop();
 
