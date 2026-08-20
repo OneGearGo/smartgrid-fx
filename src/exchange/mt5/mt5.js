@@ -130,16 +130,22 @@ export class LiveMt5 extends Mt5Base {
     const mId = Number(marketId);
     const all = (this._posCache || []).filter((p) => p.symbol === this.symbol);
     if (!all.length) return null;
-    // 合并该品种全部持仓（Hedge 模式每笔独立，网格可能成交多笔）：
-    //  - sizeBase 带方向累加（0=buy 多, 1=sell 空）
+    // 合并该品种全部持仓（Hedge 模式每笔独立，网格可能成交多笔，且可能
+    // 多空并存互相抵消——净头寸为 0 不代表没有持仓）：
+    //  - sizeBase 带方向累加（0=buy 多, 1=sell 空）→ 净头寸
+    //  - longSize / shortSize 分方向毛量（对冲时前端需要分别展示）
+    //  - positionCount 持仓笔数（判断"有无持仓"不能只看净头寸）
     //  - 浮盈/浮亏累加
     //  - entryPrice 按持仓量加权平均
     let sizeBase = 0, unrealizedPnl = 0, weighted = 0, totalVol = 0;
+    let longSize = 0, shortSize = 0, count = 0;
     for (const pos of all) {
       const vol = Number(pos.volume) || 0;
       if (vol === 0) continue;
       const signed = pos.type === 0 ? vol : -vol;
       sizeBase += signed;
+      if (signed > 0) longSize += signed; else shortSize += -signed;
+      count++;
       unrealizedPnl += Number(pos.profit) + Number(pos.swap || 0);
       weighted += Math.abs(signed) * Number(pos.price_open);
       totalVol += Math.abs(signed);
@@ -147,6 +153,9 @@ export class LiveMt5 extends Mt5Base {
     if (totalVol === 0) return null;
     return {
       sizeBase: round6(sizeBase),
+      longSize: round6(longSize),
+      shortSize: round6(shortSize),
+      positionCount: count,
       entryPrice: weighted / totalVol,
       unrealizedPnl: round2(unrealizedPnl),
       leverage: this.leverage ?? null,

@@ -225,6 +225,13 @@ export class Mt5Base extends EventEmitter {
         this.equity = Number(a.equity);
         this.leverage = a.leverage;
         this.lastOkAt = Date.now();
+        // 保证金数据（MT5 强平是账户级：保证金水平 = 权益/已用保证金×100%，
+        // 低于经纪商强平线如 50% 时账户被强平）。EA/Python 桥均已上报，
+        // 供仪表盘「保证金水平 / 可用保证金」展示与风险提示。
+        this.margin = Number.isFinite(Number(a.margin)) ? Number(a.margin) : null;
+        this.marginFree = Number.isFinite(Number(a.margin_free)) ? Number(a.margin_free) : null;
+        this.marginLevel = (this.margin > 0 && Number.isFinite(this.equity))
+          ? Math.round((this.equity / this.margin) * 1000) / 10 : null;
         // 账户初始余额基线：EA 首次上报真实值后锁定（live 盈亏起点）
         if (this._baseBalance == null && Number.isFinite(this.balance) && this.balance > 0) {
           this._baseBalance = this.balance;

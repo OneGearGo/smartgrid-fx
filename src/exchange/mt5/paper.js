@@ -95,7 +95,15 @@ export class PaperMt5 extends Mt5Base {
     if (!p || p.sizeBase === 0) return null;
     const price = this.prices.get(Number(marketId)) ?? 0;
     const unrealizedPnl = p.sizeBase * (price - p.entryPrice);
-    return { sizeBase: p.sizeBase, entryPrice: p.entryPrice, unrealizedPnl };
+    return {
+      sizeBase: p.sizeBase,
+      // paper 模拟为净额撮合（不会出现多空并存），毛量与净量一致
+      longSize: p.sizeBase > 0 ? p.sizeBase : 0,
+      shortSize: p.sizeBase < 0 ? -p.sizeBase : 0,
+      positionCount: 1,
+      entryPrice: p.entryPrice,
+      unrealizedPnl,
+    };
   }
 
   async closePosition(marketId) {

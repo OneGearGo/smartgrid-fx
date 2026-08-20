@@ -1601,11 +1601,22 @@ export class GridBot {
       health: this._health(),
       position: pos ? {
         sizeBase: round6(pos.sizeBase),
+        // 对冲模式下多空可并存，净头寸可能为 0 但仍有持仓：
+        // longSize/shortSize 分方向毛量、positionCount 持仓笔数，
+        // 前端判断"有无持仓"与展示都以此为准。
+        longSize: round6(pos.longSize ?? 0),
+        shortSize: round6(pos.shortSize ?? 0),
+        positionCount: Number(pos.positionCount) || 0,
         entryPrice: roundPrice(pos.entryPrice),
         unrealizedPnl: round2(pos.unrealizedPnl),
         leverage: pos.leverage ?? null,
         liquidationPrice: Number.isFinite(Number(pos.liquidationPrice)) && Number(pos.liquidationPrice) > 0
           ? roundPrice(Number(pos.liquidationPrice)) : null,
+        // MT5 无持仓级强平价（加密版遗留字段恒为 null）；改用账户级
+        // 保证金水平（权益/已用保证金×100%）与可用保证金——这才是 MT5
+        // 真正决定是否被强平的风控指标（低于经纪商强平线如 50% 被强平）。
+        marginLevel: Number.isFinite(Number(this.ex.marginLevel)) ? this.ex.marginLevel : null,
+        marginFree: Number.isFinite(Number(this.ex.marginFree)) ? round2(this.ex.marginFree) : null,
       } : null,
       operationalIssue: this.ex.operationalIssue ?? null,
       apiWalletAddress: this.ex.apiWalletAddress ?? null,

@@ -305,6 +305,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
 /* ── Misc ── */
 .up { color: var(--grn); }
 .down { color: var(--red); }
+.warn { color: var(--yel); }
 .muted { color: var(--mut2); font-size: 11px; }
 .pill { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 10px; font-weight: 600; }
 .pill-buy { background: #22c55e18; color: #86efac; }
@@ -736,7 +737,8 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
           <div class="kv"><span class="lbl">权益</span><span class="val" id="eur-st-eq">—</span></div></div>
         <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="eur-st-pos">—</span></div>
           <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="eur-st-entry">—</span></div>
-          <div class="kv"><span class="lbl">强平价格</span><span class="val" id="eur-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">保证金水平</span><span class="val" id="eur-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">可用保证金</span><span class="val" id="eur-st-free">—</span></div>
           <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="eur-st-rpnl">—</span></div>
           <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="eur-st-upnl">—</span></div></div>
       </div>
@@ -864,7 +866,8 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
           <div class="kv"><span class="lbl">权益</span><span class="val" id="gbp-st-eq">—</span></div></div>
         <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="gbp-st-pos">—</span></div>
           <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="gbp-st-entry">—</span></div>
-          <div class="kv"><span class="lbl">强平价格</span><span class="val" id="gbp-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">保证金水平</span><span class="val" id="gbp-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">可用保证金</span><span class="val" id="gbp-st-free">—</span></div>
           <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="gbp-st-rpnl">—</span></div>
           <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="gbp-st-upnl">—</span></div></div>
       </div>
@@ -991,7 +994,8 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
           <div class="kv"><span class="lbl">权益</span><span class="val" id="jpy-st-eq">—</span></div></div>
         <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="jpy-st-pos">—</span></div>
           <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="jpy-st-entry">—</span></div>
-          <div class="kv"><span class="lbl">强平价格</span><span class="val" id="jpy-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">保证金水平</span><span class="val" id="jpy-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">可用保证金</span><span class="val" id="jpy-st-free">—</span></div>
           <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="jpy-st-rpnl">—</span></div>
           <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="jpy-st-upnl">—</span></div></div>
       </div>
@@ -1118,7 +1122,8 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
           <div class="kv"><span class="lbl">权益</span><span class="val" id="xau-st-eq">—</span></div></div>
         <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="xau-st-pos">—</span></div>
           <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="xau-st-entry">—</span></div>
-          <div class="kv"><span class="lbl">强平价格</span><span class="val" id="xau-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">保证金水平</span><span class="val" id="xau-st-liq">—</span></div>
+          <div class="kv"><span class="lbl">可用保证金</span><span class="val" id="xau-st-free">—</span></div>
           <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="xau-st-rpnl">—</span></div>
           <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="xau-st-upnl">—</span></div></div>
       </div>
@@ -1206,7 +1211,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="panel-title">NAS100 · 账户状态</div>
       <div class="grid-2" style="gap:10px;margin-bottom:10px">
         <div><div class="kv"><span class="lbl">运行状态</span><span class="val" id="nas-st-run">未运行</span></div><div class="kv"><span class="lbl">最新价</span><span class="val" id="nas-st-price">—</span></div><div class="kv"><span class="lbl">账户余额</span><span class="val" id="nas-st-bal">—</span></div><div class="kv"><span class="lbl">权益</span><span class="val" id="nas-st-eq">—</span></div></div>
-        <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="nas-st-pos">—</span></div><div class="kv"><span class="lbl">持仓均价</span><span class="val" id="nas-st-entry">—</span></div><div class="kv"><span class="lbl">强平价格</span><span class="val" id="nas-st-liq">—</span></div><div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="nas-st-rpnl">—</span></div><div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="nas-st-upnl">—</span></div></div>
+        <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="nas-st-pos">—</span></div><div class="kv"><span class="lbl">持仓均价</span><span class="val" id="nas-st-entry">—</span></div><div class="kv"><span class="lbl">保证金水平</span><span class="val" id="nas-st-liq">—</span></div><div class="kv"><span class="lbl">可用保证金</span><span class="val" id="nas-st-free">—</span></div><div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="nas-st-rpnl">—</span></div><div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="nas-st-upnl">—</span></div></div>
       </div>
       <div class="kv"><span class="lbl">总盈亏 / 收益率</span><span class="val" id="nas-st-total">—</span></div><div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="nas-st-orders">—</span></div>
       <button class="btn btn-ghost" id="nas-reset-btn" style="margin-top:8px;font-size:12px">重置统计（盈亏/成交量清零）</button><button class="btn btn-ghost" id="nas-reconnect-btn" style="margin-top:8px;font-size:12px">🔌 重连 MT5（不动挂单/持仓）</button>
@@ -1545,7 +1550,7 @@ function applyOverviewFilter() {
 
 function updateOverviewRunningSummary(data) {
   if (!data || !Object.keys(data).length) return;
-  const names = { de:'DE', ex:'EX', rs:'RS', ar:'AR', lr:'LR' };
+  const names = { eur:'EUR', gbp:'GBP', jpy:'JPY', xau:'XAU', nas:'NAS' };
   const visible = ['eur','gbp','jpy','xau','nas'].filter(p => data[p] && (!overviewLiveOnly || data[p].mode === 'live'));
   const running = visible.filter(p => data[p].running).length;
   $('tot-running').innerHTML = running === 0
@@ -1922,18 +1927,44 @@ function makeExchangeCtrl(prefix, chartId) {
     P('st-eq').textContent = s.equity ?? '—';
 
     if (s.position) {
-      const long = s.position.sizeBase > 0;
       const levTxt = s.position.leverage ? ` <span class="muted">@${s.position.leverage}x</span>` : '';
-      P('st-pos').innerHTML = `<span class="${long?'up':'down'}">${long?'多':'空'} ${Math.abs(s.position.sizeBase)}</span>${levTxt}`;
+      // 对冲模式下多空可并存：净头寸为 0 时仍有持仓，需按方向分别展示
+      const ls = Number(s.position.longSize || 0);
+      const ss = Number(s.position.shortSize || 0);
+      const net = Number(s.position.sizeBase) || 0;
+      let posHtml;
+      if (ls > 0 && ss > 0) {
+        posHtml = `<span class="up">多 ${ls}</span> / <span class="down">空 ${ss}</span>${levTxt}`;
+      } else if (net > 0) {
+        posHtml = `<span class="up">多 ${net}</span>${levTxt}`;
+      } else if (net < 0) {
+        posHtml = `<span class="down">空 ${-net}</span>${levTxt}`;
+      } else {
+        posHtml = `<span class="muted">多 ${ls} / 空 ${ss}（对冲）</span>${levTxt}`;
+      }
+      P('st-pos').innerHTML = posHtml;
       P('st-entry').textContent = fmtPrice(s.position.entryPrice);
-      if (P('st-liq')) P('st-liq').textContent = s.position.liquidationPrice
-        ? fmtPrice(s.position.liquidationPrice)
-        : (s.mode === 'paper' ? '—（模拟账户无真实强平价）' : '—（交易所暂未返回）');
+      // MT5 无持仓级强平价（加密版遗留字段恒为 null），改用账户级
+      // 保证金水平（权益/已用保证金×100%）与可用保证金——低于经纪商
+      // 强平线（常见 50%）时账户才会被强平，这才是真正有用的风控指标。
+      if (P('st-liq')) {
+        const ml = s.position.marginLevel;
+        if (ml != null) {
+          P('st-liq').textContent = ml + '%';
+          P('st-liq').className = 'val ' + (ml < 50 ? 'down' : ml < 100 ? 'warn' : 'up');
+        } else {
+          P('st-liq').textContent = (s.mode === 'paper' ? '—（模拟账户无真实保证金水平）' : '—（等待 MT5 上报保证金）');
+        }
+      }
+      if (P('st-free')) {
+        P('st-free').textContent = s.position.marginFree != null ? fmt(s.position.marginFree) : '—';
+      }
       P('st-upnl').innerHTML = pnlHtml(s.position.unrealizedPnl);
     } else {
       P('st-pos').textContent = '无持仓';
       P('st-entry').textContent = '—';
       if (P('st-liq')) P('st-liq').textContent = '—';
+      if (P('st-free')) P('st-free').textContent = '—';
       P('st-upnl').textContent = '—';
     }
     P('st-rpnl').innerHTML = pnlHtml(s.realizedPnl);
@@ -1942,8 +1973,15 @@ function makeExchangeCtrl(prefix, chartId) {
       const showOrphan = !!(s.position && !s.running && !s.recovery);
       orphan.style.display = showOrphan ? 'block' : 'none';
       if (showOrphan) {
-        const long = s.position.sizeBase > 0;
-        P('orphan-info').innerHTML = `未托管持仓：<b class="${long ? 'up' : 'down'}">${long ? '多' : '空'} ${Math.abs(s.position.sizeBase)}</b> @ 均价 ${s.position.entryPrice} · 未实现盈亏 ${pnlHtml(s.position.unrealizedPnl)}。程序当前未在管理这笔仓位，请选择处理方式。`;
+        const ls = Number(s.position.longSize || 0);
+        const ss = Number(s.position.shortSize || 0);
+        const net = Number(s.position.sizeBase) || 0;
+        let posDesc;
+        if (ls > 0 && ss > 0) posDesc = `<b class="up">多 ${ls}</b> / <b class="down">空 ${ss}</b>`;
+        else if (net > 0) posDesc = `<b class="up">多 ${net}</b>`;
+        else if (net < 0) posDesc = `<b class="down">空 ${-net}</b>`;
+        else posDesc = `<b class="muted">多 ${ls} / 空 ${ss}（对冲）</b>`;
+        P('orphan-info').innerHTML = `未托管持仓：${posDesc} @ 均价 ${s.position.entryPrice} · 未实现盈亏 ${pnlHtml(s.position.unrealizedPnl)}。程序当前未在管理这笔仓位，请选择处理方式。`;
       }
     }
     P('st-total').innerHTML = `${pnlHtml(s.totalPnl)} <span class="muted">/ ${s.returnPct != null ? `<span class="${cls(s.returnPct)}">${s.returnPct>=0?'+':''}${s.returnPct}%</span>` : '—'}</span>`;
@@ -2228,19 +2266,36 @@ function renderOverviewPosition(prefix, d) {
   const box = $(`ov-${prefix}-position`);
   if (!box) return;
   const p = d.position;
-  if (!p || !Number(p.sizeBase)) {
+  // 判断"有无持仓"不能只看净头寸：对冲模式下多空并存时净头寸为 0，
+  // 但仍有真实持仓（positionCount > 0）。
+  const ls = Number(p?.longSize || 0);
+  const ss = Number(p?.shortSize || 0);
+  if (!p || (Number(p.sizeBase) === 0 && ls === 0 && ss === 0)) {
     box.innerHTML = '<span class="ov-position-empty">当前无持仓</span>';
     return;
   }
-  const long = Number(p.sizeBase) > 0;
   const leverage = p.leverage ? ` @${escapeHtml(p.leverage)}x` : '';
-  const liq = p.liquidationPrice
-    ? fmtPrice(p.liquidationPrice)
-    : (d.mode === 'paper' ? '—（模拟账户无真实强平价）' : '—（交易所暂未返回）');
+  // MT5 无持仓级强平价（加密版遗留字段恒为 null），改用账户级保证金水平
+  // 与可用保证金：保证金水平 = 权益/已用保证金×100%，低于经纪商强平线
+  // （常见 50%）时账户被强平，这才是 MT5 上真正决定是否被强平的指标。
+  const ml = p.marginLevel;
+  const liq = ml != null
+    ? `<span class="${ml < 50 ? 'down' : ml < 100 ? 'warn' : 'up'}">${ml}%</span>`
+    : (d.mode === 'paper' ? '—（模拟账户无真实保证金水平）' : '—（等待 MT5 上报保证金）');
+  const marginFree = p.marginFree != null ? fmt(p.marginFree) : '—';
+  let posHtml;
+  if (ls > 0 && ss > 0) {
+    posHtml = `<span class="up">多 ${fmt(ls, 8)}</span> / <span class="down">空 ${fmt(ss, 8)}</span>${leverage}`;
+  } else if (ls > 0) {
+    posHtml = `<span class="up">多 ${fmt(ls, 8)}</span>${leverage}`;
+  } else {
+    posHtml = `<span class="down">空 ${fmt(ss, 8)}</span>${leverage}`;
+  }
   box.innerHTML = `<div class="ov-position-title">当前持仓 · ${escapeHtml(d.config?.displayName || '当前市场')}</div>`
-    + `<div class="ov-stat"><span class="lbl">方向 / 数量</span><span class="val ${long ? 'up' : 'down'}">${long ? '多' : '空'} ${fmt(Math.abs(Number(p.sizeBase)), 8)}${leverage}</span></div>`
+    + `<div class="ov-stat"><span class="lbl">方向 / 数量</span><span class="val">${posHtml}</span></div>`
     + `<div class="ov-stat"><span class="lbl">持仓均价</span><span class="val">${fmtPrice(p.entryPrice)}</span></div>`
-    + `<div class="ov-stat"><span class="lbl">强平价格</span><span class="val down">${liq}</span></div>`
+    + `<div class="ov-stat"><span class="lbl">保证金水平</span><span class="val">${liq}</span></div>`
+    + `<div class="ov-stat"><span class="lbl">可用保证金</span><span class="val">${marginFree}</span></div>`
     + `<div class="ov-stat"><span class="lbl">未实现盈亏</span><span class="val">${pnlHtml(p.unrealizedPnl)}</span></div>`;
 }
 
