@@ -418,6 +418,17 @@ export class GridBot {
   /** @param cfg {marketId, mode, lower, upper, gridCount, sizeBase, leverage, outOfRangeAction} */
   async start(cfg) {
     if (this.running || this._starting) throw new Error('机器人已在运行或正在启动，请勿重复点击。');
+    // 防重复挂单：即使程序内存显示未运行（如重启后 restore 不续跑），
+    // 只要 MT5 上该品种仍挂着本程序的 magic 单，就拒绝再次启动，
+    // 避免同一品种重复挂一批网格单。
+    if (typeof this.ex.fetchOpenOrders === 'function' && this.config?.marketId != null) {
+      let real;
+      try { real = await this.ex.fetchOpenOrders(this.config.marketId); }
+      catch { real = null; }
+      if (Array.isArray(real) && real.length > 0) {
+        throw new Error(`MT5 上仍挂有 ${real.length} 个本程序挂单（magic ${this.ex.magic}）。如需重新启动，请先「停止并平仓」或「撤销所有挂单（保留持仓）」。`);
+      }
+    }
     this._starting = true;
     try { return await this._start(cfg); }
     finally { this._starting = false; }
@@ -1235,6 +1246,15 @@ export class GridBot {
    */
   async startRecovery(cfg) {
     if (this.running || this._starting) throw new Error('已在运行，请先停止再操作。');
+    // 防重复挂单：MT5 上已有本程序挂单时拒绝再次挂回收阶梯
+    if (typeof this.ex.fetchOpenOrders === 'function' && this.config?.marketId != null) {
+      let real;
+      try { real = await this.ex.fetchOpenOrders(this.config.marketId); }
+      catch { real = null; }
+      if (Array.isArray(real) && real.length > 0) {
+        throw new Error(`MT5 上仍挂有 ${real.length} 个本程序挂单（magic ${this.ex.magic}）。如需重新操作，请先「撤销所有挂单（保留持仓）」或「停止并平仓」。`);
+      }
+    }
     this._starting = true;
     try {
       const market = (await this.ex.getMarkets()).find((m) => m.marketId === Number(cfg.marketId));
