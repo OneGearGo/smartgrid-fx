@@ -162,7 +162,18 @@ class AiService {
     const per = {};
     for (const key of EXCHANGE_KEYS) {
       const s = this.bots[key].getState();
-      per[key] = { equity: s.equity, realizedPnl: s.realizedPnl, completedRungs: s.stats?.completedRungs || 0, volume: s.volume || 0 };
+      // live 模式下若 EA/桥尚未上报真实账户（_account 为空），s.equity 是
+      // 兜底值（如 PAPER_BALANCE=10000），拿它当基线会污染下一期日报的
+      // equityChange（出现虚假的巨额权益变动）。此时该品种基线置 null，
+      // makeReport 里 equityChange 会显示 null 而不是误导性数字。
+      const ex = this.exchanges[key];
+      const accountNotReady = s.mode === 'live' && ex && !ex._account;
+      per[key] = {
+        equity: accountNotReady ? null : s.equity,
+        realizedPnl: s.realizedPnl,
+        completedRungs: s.stats?.completedRungs || 0,
+        volume: s.volume || 0,
+      };
     }
     this._baseline = { t: Date.now(), per };
     this._save();
