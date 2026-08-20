@@ -63,8 +63,11 @@ class AiService {
       this._lastSentinelAt = now;
       await this.runSentinel().catch(() => {});
     }
-    // BTC 市况报告：按设定间隔（重启后若上一份还"新鲜"则等到到期再出，避免重启即刷一次）
-    const lastMkt = Math.max(this._lastMarketAt || 0, this.market?.t || 0);
+    // 市况报告：按设定间隔（重启后若上一份还"新鲜"则等到到期再出，避免重启即刷一次）。
+    // market 是 { eur:{t,...}, ... } 映射，取所有品种中最近一次分析时间。
+    const mktEntries = this.market && typeof this.market === 'object' ? Object.values(this.market) : [];
+    const lastMktT = mktEntries.length ? Math.max(...mktEntries.map((m) => m?.t || 0)) : 0;
+    const lastMkt = Math.max(this._lastMarketAt || 0, lastMktT);
     if (cfg.marketMin > 0 && now - lastMkt >= cfg.marketMin * 60_000) {
       this._lastMarketAt = now;
       await this.runMarketAnalysis().catch(() => {});
@@ -264,26 +267,39 @@ class AiService {
     return this._regime(key, marketId, { gridCfg: st.config, running: st.running });
   }
 
-  /** 定时市况报告：自动挑一个有真实行情的外汇品种做数据源（默认 XAUUSD）。 */
+  /** 定时市况报告：对全部 5 个品种各出一份市况分析（有真实行情的才分析）。 */
   async runMarketAnalysis() {
     if (this._busy.market) return this.market;
     this._busy.market = true;
     try {
-      let src = null, marketId = null;
-      // 优先 XAUUSD（黄金，波动特征适合市况分析），否则任一真实行情品种
-      const prefer = 'xau';
-      const ordered = [prefer, ...EXCHANGE_KEYS.filter((k) => k !== prefer)];
-      for (const key of ordered) {
+      const out = {};
+      let any = false;
+      const errors = {};
+      // 对每个品种独立分析：只要该品种有真实行情（dataSource=real）就出报告；
+      // 合成行情/未连接的分析没有意义，跳过但记录原因。
+      for (const key of EXCHANGE_KEYS) {
         const ex = this.exchanges[key];
-        if (ex.dataSource !== 'real') continue; // 合成行情分析没有意义
+        const bot = this.bots[key];
+        if (!ex || ex.dataSource !== 'real') {
+          errors[key] = ex ? '该品种无真实行情（当前为合成/未连接）' : '适配器未初始化';
+          continue;
+        }
         try {
+          let marketId = bot.config?.marketId;
           const ms = await ex.getMarkets();
-          if (ms && ms.length) { src = key; marketId = ms[0].marketId; break; }
-        } catch { /* 换下一个所 */ }
+          if (marketId == null) marketId = ms?.[0]?.marketId;
+          if (marketId == null) throw new Error('无可用市场');
+          out[key] = await this._regime(key, marketId, {
+            gridCfg: bot.config, running: bot.running,
+          });
+          any = true;
+        } catch (e) {
+          errors[key] = e?.message || String(e);
+        }
       }
-      if (!src) throw new Error('没有可用的真实行情来源（五品种均未连接）。');
-      this.market = await this._regime(src, marketId, {});
-      this.marketError = null;
+      if (!any) throw new Error('没有可用的真实行情来源（五品种均未连接）。');
+      this.market = out;      // { eur: {...}, gbp: {...}, ... }
+      this.marketError = Object.keys(errors).length ? errors : null;
       this._save();
       return this.market;
     } catch (e) {
