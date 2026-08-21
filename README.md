@@ -87,6 +87,7 @@
 
 ```ini
 # 1. 确认 MT5 终端登录的是你的实盘账户（或填写凭据）
+#    示例路径，改成你自己的 MT5 安装位置（如 C:\Program Files\MetaTrader 5\terminal64.exe）
 MT5_TERMINAL=F:\MT5\terminal64.exe
 MT5_LOGIN=你的实盘账号
 MT5_PASSWORD=你的实盘密码
@@ -119,7 +120,7 @@ XAU_MODE=live
 ## 架构
 
 ```
-F:\fx-grid-bot\
+smartgrid-fx\
 ├─ bridge\mt5_bridge.py     # MT5 常驻桥（stdio JSON-lines，Python MetaTrader5 库）
 ├─ src\
 │  ├─ grid.js / bot.js      # 网格数学 + 网格引擎（复刻自原版，未改动）
