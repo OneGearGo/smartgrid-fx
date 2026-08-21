@@ -1,0 +1,12 @@
+# GitHub Sponsors 配置
+# 生效后仓库右上角会显示 "Sponsor" 按钮
+# 使用步骤：
+#   1. 到 https://github.com/settings/billing 或 profile 页面开启 GitHub Sponsors（需要绑卡/PayPal）
+#   2. 开启后把下面一行的注释去掉，填你的 GitHub 用户名
+#   3. 提交推送，仓库页就会出现 Sponsor 按钮
+# 未开启 Sponsors 前，建议用 custom 填微信赞赏码页面 / 爱发电链接
+
+# github: OneGearGo
+
+# 国内读者可用的赞助渠道（任选，填你的实际链接）
+# custom: ["https://afdian.com/a/your-id"]

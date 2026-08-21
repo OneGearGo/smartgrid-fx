@@ -1,25 +1,57 @@
-# 外汇网格交易总控台（fx-grid-bot）
+<div align="center">
 
-一个在 Windows 本机运行的外汇多品种网格交易机器人：**单独登入一个 MT5 终端**，在 5 个外汇品种上各跑一套等差网格，提供中文网页仪表盘、模拟盘/实盘、趋势分析、订单对账、崩溃恢复、代理和可选 AI 助手。
+# 🤖 外汇网格交易总控台（fx-grid-bot）
 
-框架（网格引擎 / 前端仪表盘 / AI / 代理 / 崩溃恢复），MT5 通道，并为未来接入其他外汇平台预留了接口位。
+**一套运行在 MT5 上的多品种网格交易系统 · 网页仪表盘 · AI 助手 · 免费开源**
+
+[![GitHub stars](https://img.shields.io/github/stars/OneGearGo/-?style=for-the-badge&color=yellow)](https://github.com/OneGearGo/-/stargazers)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](LICENSE)
+[![Node](https://img.shields.io/badge/Node.js-20%2B-blue?style=for-the-badge)](https://nodejs.org)
+
+**如果这个项目帮到了你，请点亮 ⭐ Star —— 这是对开源作者最大的支持！**
+
+</div>
+
+---
+
+## ✨ 功能亮点
+
+- 🕸 **五品种网格**：EURUSD / GBPUSD / USDJPY / XAUUSD / NAS100 同时跑，互不干扰
+- 📐 **三种网格模式**：中性（双向震荡）/ 做多（低买高止）/ 做空（高空低止）
+- 🔄 **自动补格锁利润**：成交一格自动在相邻价反向挂单，震荡市滚动收割
+- 📊 **ATR 自适应间距**：按波动率自动调间距与区间，专业 EA 的做法
+- 🛡 **风控熔断**：回撤熔断 + 日亏损限额，挂机自动止损（专业 EA 的核心风控）
+- 🤖 **AI 助手**：市况分析（五品种各自报告）、风控哨兵、每日复盘日报
+- 🖥 **网页仪表盘**：浏览器实时看持仓/盈亏/挂单，手机也能访问
+- 🔌 **双桥支持**：Python 桥 + MQL5 EA 桥，单/多终端环境通吃
+- 🔐 **安全设计**：防重复挂单、崩溃自动恢复、重启接管仓位、仅本地监听
 
 > [!CAUTION]
 > 这是交易软件，不是收益保证或投资建议。`live` 会使用真实账户、真实保证金并发送真实订单，可能产生手续费、滑点、强平或全部损失。第一次使用必须保持所有槽位为 `paper`；确认功能和配置后，再用小额资金逐个启用实盘。
 
-## 五品种（默认）
+---
 
-| 槽位 | 品种 | 说明 |
-| --- | --- | --- |
-| eur | EURUSD | 主流直盘 |
-| gbp | GBPUSD | 主流直盘 |
-| jpy | USDJPY | 主流直盘 |
-| xau | XAUUSD | 黄金 |
-| nas | NAS100 | 指数 |
+## ☕ 支持这个项目
 
-每个槽位可独立配置：品种（`*_SYMBOL`）、运行模式（`*_MODE=paper|live`）、接入平台（`*_PLATFORM`）。所有槽位共享同一个 MT5 终端（单终端登入）。
+如果你觉得这个项目有用：
 
-## 三步启动（paper 模式）
+| 方式 | 说明 |
+| --- | --- |
+| ⭐ **Star** | 点亮 GitHub Star，让更多人看到它 |
+| 🍵 **打赏** | 微信/支付宝赞赏码见下方，或 [GitHub Sponsors](https://github.com/sponsors/OneGearGo) |
+| 📣 **分享** | 转发给做量化/外汇的朋友 |
+| 🐛 **反馈** | 提 Issue / PR，一起改进 |
+
+> 作者花了上百小时打磨这套系统。你的每一次支持（Star/打赏/反馈）都是持续更新的动力 🙏
+
+<!-- 赞赏码占位：放你的微信/支付宝收款码图片
+<img src="docs/donate-wechat.png" width="180" alt="微信赞赏码"/>
+<img src="docs/donate-alipay.png" width="180" alt="支付宝赞赏码"/>
+-->
+
+---
+
+## 🚀 三步启动（paper 模式）
 
 1. 安装依赖：`npm ci`（需要 Node.js 20+）
 2. 复制配置：`Copy-Item .env.example .env`，确认 `MT5_TERMINAL` 指向你的终端
