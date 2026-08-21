@@ -14,9 +14,11 @@ import { setupProxies, checkProxy } from './proxy.js';
 import { loadSnapshot, saveSnapshot } from './persist.js';
 import { createAiService } from './ai/service.js';
 import { dashboardExchangeState } from './overview.js';
+import { getSlotsConfig, updateSlotConfig, getStrategies, addStrategy, deleteStrategy, getSystemStatus } from './settings.js';
 
 // ── 启动配置 ─────────────────────────────────────────────────────────────────
 const cfg = getConfig();
+const startedAt = Date.now();
 
 // ── 代理设置 ─────────────────────────────────────────────────────────────────
 const proxyResult = await setupProxies(cfg);
@@ -366,6 +368,39 @@ const server = http.createServer(async (request, res) => {
       } catch (e) {
         return send(res, 500, { error: e.message });
       }
+    }
+
+    // ── 设置：品种槽位管理 ──────────────────────────────────────────────────
+    if (p === '/api/settings/slots' && request.method === 'GET') {
+      return send(res, 200, { slots: getSlotsConfig() });
+    }
+    if (p === '/api/settings/slots' && request.method === 'POST') {
+      try {
+        const b = await readBody(request);
+        return send(res, 200, updateSlotConfig(String(b.key || '').toLowerCase(), b));
+      } catch (e) { return send(res, 400, { error: e.message }); }
+    }
+
+    // ── 设置：策略模板库 ────────────────────────────────────────────────────
+    if (p === '/api/settings/strategies' && request.method === 'GET') {
+      return send(res, 200, { strategies: getStrategies() });
+    }
+    if (p === '/api/settings/strategies' && request.method === 'POST') {
+      try {
+        const b = await readBody(request);
+        return send(res, 200, { strategy: addStrategy(b) });
+      } catch (e) { return send(res, 400, { error: e.message }); }
+    }
+    if (p === '/api/settings/strategies' && request.method === 'DELETE') {
+      try {
+        const b = await readBody(request);
+        return send(res, 200, deleteStrategy(String(b.id || '')));
+      } catch (e) { return send(res, 400, { error: e.message }); }
+    }
+
+    // ── 设置：系统运行状态（只读） ──────────────────────────────────────────
+    if (p === '/api/settings/system') {
+      return send(res, 200, getSystemStatus({ exchanges, sharedBridge, startedAt }));
     }
 
     // ── 槽位子路由 ────────────────────────────────────────────────────────

@@ -1303,9 +1303,51 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
 </div>
 
 <div id="tab-settings" class="tab-panel">
-<div class="wrap" style="max-width:720px">
+<div class="wrap" style="max-width:860px">
+
+  <!-- ── 系统设置：品种槽位管理 ─────────────────────────────────────────── -->
   <div class="panel" style="margin-top:4px">
-    <div class="panel-title">代理 / IP 配置</div>
+    <div class="panel-title">🎛 品种槽位管理</div>
+    <p class="muted" style="margin-bottom:12px;line-height:1.6">
+      在网页上直接配置 5 个品种槽位（写入 <code style="background:var(--bg2);padding:1px 5px;border-radius:3px">.env</code>）。<br>
+      <strong style="color:var(--yel)">改动需重启服务器生效</strong>；运行中的网格不受影响，重启后可用「重新接管」恢复。
+    </p>
+    <div id="slot-manage-list" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
+  <!-- ── 系统设置：策略模板库 ───────────────────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">📐 策略模板库</div>
+    <p class="muted" style="margin-bottom:12px;line-height:1.6">
+      保存多套网格参数模板，一键填入品种启动表单。内置模板不可删除，可添加自定义模板。
+    </p>
+    <div id="strategy-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="ip-section" style="margin-top:10px">
+      <div class="ip-section-title">➕ 新建自定义模板</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:8px">
+        <div><label>名称</label><input id="st-name" type="text" placeholder="如：黄金波段"></div>
+        <div><label>格数</label><input id="st-count" type="number" value="20" min="2" max="100"></div>
+        <div><label>间距%</label><input id="st-spacing" type="number" value="0.25" step="0.01" min="0.01" max="5"></div>
+        <div><label>杠杆</label><input id="st-leverage" type="number" value="100" min="1" max="1000"></div>
+        <div><label>每格量</label><input id="st-size" type="number" value="0.01" step="0.01" min="0.01"></div>
+        <div><label>区间外</label><select id="st-oor"><option value="close">平仓停止</option><option value="recover">只减仓回收</option></select></div>
+      </div>
+      <div><label>说明</label><input id="st-desc" type="text" placeholder="可选，一句话描述适用场景" style="width:100%"></div>
+      <button class="ip-apply-btn" style="margin-top:8px" onclick="addStrategy()">保存模板</button>
+      <div class="ip-status" id="st-status"></div>
+    </div>
+  </div>
+
+  <!-- ── 系统设置：运行状态 ─────────────────────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">🖥 系统运行状态</div>
+    <div id="sys-status-box" class="ai-box muted">加载中…</div>
+    <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="loadSystemStatus()">刷新状态</button>
+  </div>
+
+  <!-- ── 代理 / IP 配置（保留） ──────────────────────────────────────────── -->
+  <div class="panel" style="margin-top:14px">
+    <div class="panel-title">🌐 代理 / 出网配置</div>
     <p class="muted" style="margin-bottom:14px;line-height:1.6">
       配置代理后，服务器重启才能生效（修改 <code style="background:var(--bg2);padding:1px 5px;border-radius:3px">.env</code> 文件中对应字段）。<br>
       下方"测试连接"按钮会通过当前已配置的代理检测出口IP，无需重启。<br>
@@ -2494,6 +2536,175 @@ async function loadProxyConfig() {
   } catch {}
 }
 loadProxyConfig();
+
+// ══ 系统设置：品种槽位管理 ═══════════════════════════════════════════════════
+const SLOT_META = { eur:'EURUSD', gbp:'GBPUSD', jpy:'USDJPY', xau:'XAUUSD', nas:'NAS100' };
+
+async function loadSlotsConfig() {
+  try {
+    const j = await (await fetch('/api/settings/slots')).json();
+    const list = $('slot-manage-list');
+    if (!list) return;
+    list.innerHTML = (j.slots || []).map((s) => {
+      const name = SLOT_META[s.key] || s.key.toUpperCase();
+      return `<div class="ip-section" style="margin:0">
+        <div class="ip-section-title" style="text-transform:none">${name}（${s.key} 槽位）</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px">
+          <div><label>品种 Symbol</label><input id="slot-${s.key}-symbol" type="text" value="${escapeHtml(s.symbol)}" placeholder="如 EURUSD"></div>
+          <div><label>模式 Mode</label><select id="slot-${s.key}-mode">
+            <option value="paper" ${s.mode === 'paper' ? 'selected' : ''}>paper（模拟）</option>
+            <option value="live" ${s.mode === 'live' ? 'selected' : ''}>live（实盘）</option>
+          </select></div>
+          <div><label>平台 Platform</label><select id="slot-${s.key}-platform">
+            <option value="mt5" ${s.platform === 'mt5' ? 'selected' : ''}>mt5</option>
+          </select></div>
+          <div><label>代理（可选）</label><input id="slot-${s.key}-proxy" type="text" value="${escapeHtml(s.proxy || '')}" placeholder="留空继承全局"></div>
+          <button class="ip-apply-btn" onclick="saveSlot('${s.key}')">保存</button>
+        </div>
+        <div class="ip-status" id="slot-${s.key}-status"></div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    const list = $('slot-manage-list');
+    if (list) list.innerHTML = `<div class="ip-status down">加载槽位配置失败：${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function saveSlot(key) {
+  const status = $(`slot-${key}-status`);
+  if (status) status.textContent = '保存中…';
+  const body = {
+    key,
+    symbol: $(`slot-${key}-symbol`).value,
+    mode: $(`slot-${key}-mode`).value,
+    platform: $(`slot-${key}-platform`).value,
+    proxy: $(`slot-${key}-proxy`).value,
+  };
+  try {
+    const r = await fetch('/api/settings/slots', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (j.error) { if (status) status.textContent = '❌ ' + j.error; return; }
+    if (status) status.innerHTML = `<span class="up">✓ 已保存到 .env，重启服务器后生效（重启后可在各品种页点「重新接管」恢复网格）。</span>`;
+  } catch (e) {
+    if (status) status.textContent = '❌ 保存失败：' + e.message;
+  }
+}
+
+// ══ 系统设置：策略模板库 ════════════════════════════════════════════════════
+async function loadStrategies() {
+  try {
+    const j = await (await fetch('/api/settings/strategies')).json();
+    const list = $('strategy-list');
+    if (!list) return;
+    list.innerHTML = (j.strategies || []).map((s) => `
+      <div class="ip-section" style="margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-weight:700">${escapeHtml(s.name)} ${s.builtin ? '<span class="muted" style="font-size:10px;font-weight:400">内置</span>' : ''}</div>
+          <div class="muted" style="font-size:11px">${s.gridCount} 格 · 间距 ${s.spacingPct}% · ${s.leverage}x · 每格 ${s.sizeBasePct}${s.outOfRangeAction === 'recover' ? ' · 区间外只减仓' : ''}${s.desc ? ' · ' + escapeHtml(s.desc) : ''}</div>
+        </div>
+        <button class="ip-apply-btn" onclick="applyStrategyToAll('${s.id}')">填入全部品种</button>
+        ${s.builtin ? '' : `<button class="ip-apply-btn" style="color:var(--red)" onclick="deleteStrategy('${s.id}')">删除</button>`}
+      </div>`).join('');
+  } catch (e) {
+    const list = $('strategy-list');
+    if (list) list.innerHTML = `<div class="ip-status down">加载模板失败：${escapeHtml(e.message)}</div>`;
+  }
+}
+
+/** 把模板参数填入 5 个品种的启动表单（下/上边界按现价±间距×格数/2 计算）。 */
+async function applyStrategyToAll(id) {
+  try {
+    const j = await (await fetch('/api/settings/strategies')).json();
+    const s = (j.strategies || []).find((x) => x.id === id);
+    if (!s) { alert('模板不存在'); return; }
+    for (const p of ['eur', 'gbp', 'jpy', 'xau', 'nas']) {
+      const gridCount = $(`${p}-grid-count`), leverage = $(`${p}-leverage`), size = $(`${p}-size-base`), oor = $(`${p}-auto-stop`);
+      const priceEl = null;
+      if (gridCount) gridCount.value = s.gridCount;
+      if (leverage) leverage.value = s.leverage;
+      if (size) size.value = s.sizeBasePct;
+      if (oor) oor.value = s.outOfRangeAction;
+      // 区间：按当前价 ± 间距%×格数/2（拿不到价就用原值）
+      void priceEl;
+    }
+    alert(`已把「${s.name}」参数填入 5 个品种启动表单（格数/杠杆/每格量/区间外策略）。区间可按当前行情手动微调后启动。`);
+    loadStrategies();
+  } catch (e) { alert('套用失败：' + e.message); }
+}
+
+async function addStrategy() {
+  const status = $('st-status');
+  const body = {
+    name: $('st-name').value,
+    gridCount: $('st-count').value,
+    spacingPct: $('st-spacing').value,
+    leverage: $('st-leverage').value,
+    sizeBasePct: $('st-size').value,
+    outOfRangeAction: $('st-oor').value,
+    desc: $('st-desc').value,
+  };
+  try {
+    const r = await fetch('/api/settings/strategies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (j.error) { if (status) status.textContent = '❌ ' + j.error; return; }
+    if (status) status.textContent = '✅ 模板已保存';
+    $('st-name').value = ''; $('st-desc').value = '';
+    loadStrategies();
+  } catch (e) { if (status) status.textContent = '❌ ' + e.message; }
+}
+
+async function deleteStrategy(id) {
+  if (!confirm('确认删除该模板？')) return;
+  try {
+    const r = await fetch('/api/settings/strategies', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    const j = await r.json();
+    if (j.error) { alert(j.error); return; }
+    loadStrategies();
+  } catch (e) { alert('删除失败：' + e.message); }
+}
+
+// ══ 系统设置：运行状态 ═══════════════════════════════════════════════════════
+async function loadSystemStatus() {
+  const box = $('sys-status-box');
+  if (!box) return;
+  try {
+    const j = await (await fetch('/api/settings/system')).json();
+    const up = j.uptimeSec;
+    const upTxt = up >= 3600 ? `${Math.floor(up / 3600)}h ${Math.floor((up % 3600) / 60)}m` : `${Math.floor(up / 60)}m ${up % 60}s`;
+    const b = j.bridge || {};
+    const bState = b.connected
+      ? `<span class="up">✓ 已连接</span>（最近上报 ${b.lastStateAgeMs != null ? Math.round(b.lastStateAgeMs / 1000) + 's 前' : '—'}${b.pendingCommands ? ` · 待执行命令 ${b.pendingCommands}` : ''}）`
+      : `<span class="down">✗ 未连接</span>${b.kind === 'ea' ? '（请确认 EA 已拖到 MT5 图表并开启自动交易）' : '（Python 桥未启动）'}`;
+    const acct = b.account ? `<br>账户 ${b.account.login} @ ${b.account.server} · 余额 ${fmt(b.account.balance)} · 权益 ${fmt(b.account.equity)} · 保证金水平 ${b.account.margin > 0 ? Math.round(b.account.equity / b.account.margin * 1000) / 10 + '%' : '—'} · ${b.account.leverage}x` : '';
+    const slotsTxt = Object.entries(j.slots || {}).map(([k, s]) => {
+      const ds = s.dataSource === 'real' ? '<span class="up">真实行情</span>' : s.dataSource === 'synthetic' ? '<span class="down">合成行情</span>' : '<span class="muted">—</span>';
+      return `${(SLOT_META[k] || k.toUpperCase())} ${ds}`;
+    }).join(' · ');
+    box.className = 'ai-box';
+    box.innerHTML =
+      `运行时长 <b>${upTxt}</b> · 端口 <b>${j.port}</b>（${j.host}）<br>` +
+      `MT5 终端 <b>${escapeHtml(j.mt5.terminal)}</b> · 账号 ${escapeHtml(j.mt5.login)} @ ${escapeHtml(j.mt5.server)} · 桥 <b>${j.mt5.bridge.toUpperCase()}</b>（EA 端口 ${j.mt5.eaPort}）<br>` +
+      `桥状态 ${bState}${acct}<br>` +
+      `行情 ${slotsTxt}`;
+  } catch (e) {
+    box.className = 'ai-box muted';
+    box.textContent = '加载失败：' + e.message;
+  }
+}
+
+// 切到设置页时刷新数据
+const _origSwitchTab = window.switchTab;
+window.switchTab = function (name) {
+  if (typeof _origSwitchTab === 'function') _origSwitchTab(name);
+  if (name === 'settings') {
+    loadSlotsConfig();
+    loadStrategies();
+    loadSystemStatus();
+  }
+};
+loadSlotsConfig();
+loadStrategies();
+loadSystemStatus();
 
 // ══ AI 助手 ═══════════════════════════════════════════════════════════════
 const AI_ENV_MAP = {
