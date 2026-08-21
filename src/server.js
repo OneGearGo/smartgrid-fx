@@ -59,7 +59,12 @@ for (const key of SLOT_ORDER) {
   // 每个槽位分配独立 magic 号（live 模式标识网格单，避免误撤手动单）
   const magic = 30000 + SLOT_ORDER.indexOf(key);
   const ex = createExchange(slotCfg, cfg.mt5, magic);
-  const bot = new GridBot(ex, { onChange: (s) => saveSnapshot(key, s) });
+  const bot = new GridBot(ex, {
+    onChange: (s) => saveSnapshot(key, s),
+    // 风控熔断（.env 配置，0=关闭）：回撤熔断 / 日亏损限额
+    maxDrawdownPct: Number(process.env.MAX_DRAWDOWN_PCT || 0),
+    dailyLossLimitPct: Number(process.env.DAILY_LOSS_LIMIT_PCT || 0),
+  });
   // 状态恢复（仅显示连续性，不自动续跑）
   bot.restore(loadSnapshot(key));
   bots[key] = bot;

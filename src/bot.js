@@ -59,6 +59,11 @@ export class GridBot {
     this._cancelVerifyStableReads = opts.cancelVerifyStableReads ?? 2;
     this._recoveryCancelInFlight = false;
     this._finishingRecovery = false;
+    // ── 风控熔断（ATR 间距 + 回撤/日亏损熔断） ──────────────────────────
+    this.maxDrawdownPct = Number(opts.maxDrawdownPct) > 0 ? Number(opts.maxDrawdownPct) : 0; // 0=关闭
+    this.dailyLossLimitPct = Number(opts.dailyLossLimitPct) > 0 ? Number(opts.dailyLossLimitPct) : 0; // 0=关闭
+    this.circuit = null;        // {type:'drawdown'|'daily', reason, at, equityAtTrip}
+    this.dailyBase = null;      // 当日基准权益 {day:'YYYY-MM-DD', equity}
   }
 
   /**
@@ -440,11 +445,49 @@ export class GridBot {
 
     const leverage = Math.min(Number(cfg.leverage || 3), market.maxLeverage || 50);
     const sizeBase = Math.max(Number(cfg.sizeBase), market.minOrderSize || 0);
+    // ── ATR 自适应间距：spacingMode='atr' 时按 1h ATR 波动率自动生成
+    //    间距与区间（区间以现价为中心 ± 间距×格数/2），否则用页面手填值。
+    let lower = Number(cfg.lower), upper = Number(cfg.upper), gridCount = Number(cfg.gridCount);
+    if (cfg.spacingMode === 'atr') {
+      const atrMul = Number(cfg.atrMultiplier) > 0 ? Number(cfg.atrMultiplier) : 1;
+      let atrInfo = null;
+      try {
+        const candles = await this.ex.getCandles(market.marketId, 3600, 200);
+        const closes = (candles || []).map((c) => Number(c.close)).filter((v) => Number.isFinite(v));
+        if (closes.length >= 30) {
+          const priceNow = closes[closes.length - 1];
+          // 简化 ATR：最近 14 根真实波幅均值（High-Low）
+          const recent = (candles || []).slice(-14);
+          const trs = recent.map((c) => {
+            const h = Number(c.high), l = Number(c.low), pc = Number(c.close);
+            return Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc));
+          }).filter((v) => Number.isFinite(v) && v > 0);
+          const atr = trs.length ? trs.reduce((a, b) => a + b, 0) / trs.length : null;
+          if (atr != null && atr > 0 && Number.isFinite(priceNow) && priceNow > 0) {
+            const spacing = Math.max(atr * atrMul, market.stepPrice || 0);
+            const half = (spacing * gridCount) / 2;
+            lower = roundPrice(Math.max(0, priceNow - half));
+            upper = roundPrice(priceNow + half);
+            atrInfo = {
+              atr: roundPrice(atr), atrPct: round2((atr / priceNow) * 100),
+              spacing: roundPrice(spacing), spacingPct: round2((spacing / priceNow) * 100),
+            };
+          }
+        }
+      } catch { /* ATR 失败则退回手填区间 */ }
+      if (!atrInfo) {
+        this._alert('⚠️ ATR 自适应间距未能获取足够K线（<30 根），已退回使用手动区间。');
+      } else {
+        this._alert(`📐 ATR 自适应：1h ATR=${atrInfo.atr}（${atrInfo.atrPct}%），间距=${atrInfo.spacing}（${atrInfo.spacingPct}%），区间 [${lower}, ${upper}]（以现价为中心）。`);
+      }
+    }
     this.config = {
       marketId: market.marketId, displayName: market.displayName,
       mode: cfg.mode || 'neutral',
-      lower: Number(cfg.lower), upper: Number(cfg.upper),
-      gridCount: Number(cfg.gridCount), sizeBase, leverage,
+      lower, upper,
+      gridCount, sizeBase, leverage,
+      spacingMode: cfg.spacingMode === 'atr' ? 'atr' : 'fixed',
+      atrMultiplier: Number(cfg.atrMultiplier) > 0 ? Number(cfg.atrMultiplier) : 1,
       // 区间外止损策略：'close'=冲破区间平仓（撤单+平仓+停止）；'recover'=只减仓回收阶梯
       outOfRangeAction: cfg.outOfRangeAction === 'recover' ? 'recover' : 'close',
       stepSize: market.stepSize, stepPrice: market.stepPrice,
@@ -457,6 +500,9 @@ export class GridBot {
     this._retryQueue = []; this._noPosStreak = 0;
     this._placementProgress = null;
     this.recovery = false;
+    // 启动时初始化风控熔断：清除上次熔断记录，锁定当日基准权益
+    this.circuit = null;
+    this._initDailyBase();
 
     // record the starting equity up front (margin pre-check, returnPct, recovery)
     if (this.startBalance == null) {
@@ -1138,9 +1184,70 @@ export class GridBot {
     this._changed();
   }
 
+  /** 当日基准权益：跨天自动重建（以当天首次观察到的权益为基准）。 */
+  _initDailyBase() {
+    const day = new Date().toISOString().slice(0, 10);
+    const eq = typeof this.ex.equity === 'number' && Number.isFinite(this.ex.equity) ? this.ex.equity : null;
+    if (this.dailyBase && this.dailyBase.day === day) return; // 今天已有基准
+    this.dailyBase = { day, equity: eq };
+  }
+
+  /**
+   * 风控熔断：每次价格 tick 检查
+   *  - 回撤熔断（maxDrawdownPct）：相对启动权益，总盈亏（已实现+未实现）跌幅超阈值 → 停止
+   *  - 日亏损限额（dailyLossLimitPct）：相对当日基准权益，当日亏损超阈值 → 停止
+   * 熔断后按 outOfRangeAction 决定平仓（close）还是保仓停（recover）。
+   */
+  async _checkCircuitBreakers() {
+    if (!this.running || this.circuit || this._stopping) return;
+    if (!(this.maxDrawdownPct > 0 || this.dailyLossLimitPct > 0)) return;
+    this._initDailyBase();
+
+    // 当前权益 + 总盈亏（品种级：已实现+未实现）
+    const equityNow = typeof this.ex.equity === 'number' && Number.isFinite(this.ex.equity) ? this.ex.equity : null;
+    let unrealized = 0;
+    try {
+      const pos = await this.ex.getPosition?.(this.config.marketId);
+      if (pos && Number.isFinite(Number(pos.unrealizedPnl))) unrealized = Number(pos.unrealizedPnl);
+    } catch { /* 拿不到持仓就按 0 处理，不误熔断 */ }
+    const realized = typeof this.ex.realizedPnl === 'number' ? this.ex.realizedPnl - (this._pnlBase ?? 0) : 0;
+    const totalPnl = round2(realized + unrealized);
+
+    // 1) 回撤熔断：相对启动权益
+    if (this.maxDrawdownPct > 0 && this.startBalance != null && this.startBalance > 0 && equityNow != null) {
+      const ddPct = round2((totalPnl / this.startBalance) * 100);
+      if (ddPct <= -this.maxDrawdownPct) {
+        this._tripCircuit('drawdown', `回撤 ${ddPct}% 超过熔断线 ${this.maxDrawdownPct}%`, equityNow, ddPct);
+        return;
+      }
+    }
+    // 2) 日亏损限额：相对当日基准
+    if (this.dailyLossLimitPct > 0 && this.dailyBase?.equity != null && this.dailyBase.equity > 0 && equityNow != null) {
+      const dayLossPct = round2(((equityNow - this.dailyBase.equity) / this.dailyBase.equity) * 100);
+      if (dayLossPct <= -this.dailyLossLimitPct) {
+        this._tripCircuit('daily', `当日亏损 ${dayLossPct}% 超过限额 ${this.dailyLossLimitPct}%`, equityNow, dayLossPct);
+      }
+    }
+  }
+
+  /** 触发熔断：记录状态、告警、按区间外策略停止（close=平仓 / recover=保仓停止）。 */
+  _tripCircuit(type, reason, equityAtTrip, pct) {
+    this.circuit = { type, reason, at: Date.now(), equityAtTrip, pct };
+    this._alert(`🛑 风控熔断（${type === 'drawdown' ? '回撤' : '日亏损'}）：${reason}。权益 ${round2(equityAtTrip)}，自动停止${this.config.outOfRangeAction === 'recover' ? '（保留持仓，等价格回来再处理）' : '并平仓'}。`);
+    this._changed();
+    if (this.config.outOfRangeAction === 'recover') {
+      // 保仓停止：只撤单不自动平仓（用户自行决定）
+      this.stop({ closePosition: false }).catch(() => {});
+    } else {
+      this.stop({ closePosition: true }).catch(() => {});
+    }
+  }
+
   _handlePrice(p) {
     if (p.marketId !== this.config.marketId) return;
     this.lastPrice = p.price;
+    this._checkCircuitBreakers().catch(() => {});
+    if (this.circuit) return; // 已熔断：不再进行补单/替换等交易动作
     this._drainRetryQueue().catch(() => {});
     if (this.recovery) { this._manageRecoveryStandalone(); return; }
     const out = p.price < this.config.lower || p.price > this.config.upper;
@@ -1609,6 +1716,12 @@ export class GridBot {
       mode: this.ex.mode,
       recovery: this.recovery,
       running: this.running,
+      circuit: this.circuit,
+      circuitBreakers: {
+        maxDrawdownPct: this.maxDrawdownPct,
+        dailyLossLimitPct: this.dailyLossLimitPct,
+        dailyBase: this.dailyBase,
+      },
       config: this.config,
       grid: this.grid,
       lastPrice: this.lastPrice != null ? round2(this.lastPrice) : null,

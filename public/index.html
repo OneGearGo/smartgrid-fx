@@ -701,6 +701,19 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="eur-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
+        <div>
+          <label>间距模式</label>
+          <select id="eur-spacing-mode">
+            <option value="fixed" selected>固定（手动区间）</option>
+            <option value="atr">ATR 自适应（自动区间）</option>
+          </select>
+        </div>
+        <div>
+          <label>ATR 倍数</label>
+          <input id="eur-atr-mult" type="number" step="any" value="1" min="0.1">
+        </div>
+      </div>
+      <div class="row">
         <div><label>杠杆 (x)</label><select id="eur-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
@@ -831,6 +844,19 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="gbp-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
+        <div>
+          <label>间距模式</label>
+          <select id="gbp-spacing-mode">
+            <option value="fixed" selected>固定（手动区间）</option>
+            <option value="atr">ATR 自适应（自动区间）</option>
+          </select>
+        </div>
+        <div>
+          <label>ATR 倍数</label>
+          <input id="gbp-atr-mult" type="number" step="any" value="1" min="0.1">
+        </div>
+      </div>
+      <div class="row">
         <div><label>杠杆 (x)</label><select id="gbp-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
@@ -957,6 +983,19 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <div class="row">
         <div><label>网格数量</label><input id="jpy-grid-count" type="number" value="20" min="2"></div>
         <div><label>每格数量(币)</label><input id="jpy-size-base" type="number" step="any" value="0.01"></div>
+      </div>
+      <div class="row">
+        <div>
+          <label>间距模式</label>
+          <select id="jpy-spacing-mode">
+            <option value="fixed" selected>固定（手动区间）</option>
+            <option value="atr">ATR 自适应（自动区间）</option>
+          </select>
+        </div>
+        <div>
+          <label>ATR 倍数</label>
+          <input id="jpy-atr-mult" type="number" step="any" value="1" min="0.1">
+        </div>
       </div>
       <div class="row">
         <div><label>杠杆 (x)</label><select id="jpy-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
@@ -1087,6 +1126,19 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
         <div><label>每格数量(币)</label><input id="xau-size-base" type="number" step="any" value="0.01"></div>
       </div>
       <div class="row">
+        <div>
+          <label>间距模式</label>
+          <select id="xau-spacing-mode">
+            <option value="fixed" selected>固定（手动区间）</option>
+            <option value="atr">ATR 自适应（自动区间）</option>
+          </select>
+        </div>
+        <div>
+          <label>ATR 倍数</label>
+          <input id="xau-atr-mult" type="number" step="any" value="1" min="0.1">
+        </div>
+      </div>
+      <div class="row">
         <div><label>杠杆 (x)</label><select id="xau-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div>
         <div>
           <label>区间外止损策略</label>
@@ -1190,6 +1242,19 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <button class="btn btn-smart" id="nas-smart-fill">🎯 智能填充参数</button><div class="muted" id="nas-smart-note" style="margin:5px 0 2px"></div>
       <div class="row"><div><label>下边界</label><input id="nas-lower" type="number" step="any"></div><div><label>上边界</label><input id="nas-upper" type="number" step="any"></div></div>
       <div class="row"><div><label>网格数量</label><input id="nas-grid-count" type="number" value="20" min="2"></div><div><label>每格数量(币)</label><input id="nas-size-base" type="number" step="any" value="0.001"></div></div>
+      <div class="row">
+        <div>
+          <label>间距模式</label>
+          <select id="nas-spacing-mode">
+            <option value="fixed" selected>固定（手动区间）</option>
+            <option value="atr">ATR 自适应（自动区间）</option>
+          </select>
+        </div>
+        <div>
+          <label>ATR 倍数</label>
+          <input id="nas-atr-mult" type="number" step="any" value="1" min="0.1">
+        </div>
+      </div>
       <div class="row"><div><label>杠杆 (x)</label><select id="nas-leverage"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></div><div><label>区间外止损策略</label><select id="nas-auto-stop"><option value="close" selected>冲破区间平仓</option><option value="recover">只减仓回收阶梯</option></select></div></div>
       <div class="risk-preview" id="nas-risk-preview"></div>
       <button class="btn btn-start" id="nas-start-btn">启动 NAS100 网格</button>
@@ -1336,6 +1401,24 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <button class="ip-apply-btn" style="margin-top:8px" onclick="addStrategy()">保存模板</button>
       <div class="ip-status" id="st-status"></div>
     </div>
+  </div>
+
+  <!-- ── 系统设置：风控熔断 ─────────────────────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">🛑 风控熔断（全局）</div>
+    <p class="muted" style="margin-bottom:12px;line-height:1.6">
+      挂机时的安全网：任一品种触发阈值即自动停止该品种网格。<br>
+      <strong style="color:var(--yel)">回撤熔断</strong>：品种总盈亏（已实现+未实现）相对启动权益跌幅超阈值 → 停止。<br>
+      <strong style="color:var(--yel)">日亏损限额</strong>：账户当日亏损（相对当天基准权益）超阈值 → 停止。跨天自动重置。<br>
+      停止方式跟随各品种的「区间外策略」：<code>平仓</code> 或 <code>保留持仓</code>。改动写 .env，重启生效。
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;max-width:560px">
+      <div><label>回撤熔断 %（0=关闭）</label><input id="cb-drawdown" type="number" step="any" min="0" placeholder="如 10"></div>
+      <div><label>日亏损限额 %（0=关闭）</label><input id="cb-daily" type="number" step="any" min="0" placeholder="如 5"></div>
+      <button class="ip-apply-btn" onclick="saveCircuitBreakers()">保存到 .env</button>
+    </div>
+    <div class="ip-status" id="cb-status"></div>
+    <div id="cb-current" class="muted" style="margin-top:8px;font-size:12px"></div>
   </div>
 
   <!-- ── 系统设置：运行状态 ─────────────────────────────────────────────── -->
@@ -1784,6 +1867,8 @@ function makeExchangeCtrl(prefix, chartId) {
       lower: +P('lower').value, upper: +P('upper').value,
       gridCount: +P('grid-count').value, sizeBase: +P('size-base').value,
       leverage: +P('leverage').value, outOfRangeAction: P('auto-stop').value,
+      spacingMode: P('spacing-mode') ? P('spacing-mode').value : 'fixed',
+      atrMultiplier: P('atr-mult') ? +P('atr-mult').value || 1 : 1,
     };
     const btn = P('start-btn'), old = btn.textContent;
     setExchangeActionBusy(prefix, true); btn.textContent = '启动中…';
@@ -2692,6 +2777,38 @@ async function loadSystemStatus() {
   }
 }
 
+// ══ 系统设置：风控熔断 ═══════════════════════════════════════════════════════
+async function saveCircuitBreakers() {
+  const status = $('cb-status');
+  const pairs = [];
+  const dd = $('cb-drawdown').value.trim();
+  const dl = $('cb-daily').value.trim();
+  if (dd !== '') pairs.push(['MAX_DRAWDOWN_PCT', dd]);
+  if (dl !== '') pairs.push(['DAILY_LOSS_LIMIT_PCT', dl]);
+  if (!pairs.length) { if (status) status.textContent = '未填写，无变更'; return; }
+  for (const [key, value] of pairs) {
+    if (!/^\d{1,4}(\.\d{1,2})?$/.test(value)) { if (status) status.textContent = '❌ 必须是数字（0=关闭）'; return; }
+    const r = await fetch('/api/env', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value }) });
+    const j = await r.json();
+    if (j.error) { if (status) status.textContent = '❌ ' + j.error; return; }
+  }
+  if (status) status.innerHTML = '<span class="up">✅ 已保存到 .env，重启服务器后生效。</span>';
+  $('cb-drawdown').value = ''; $('cb-daily').value = '';
+  loadCircuitBreakers();
+}
+
+async function loadCircuitBreakers() {
+  try {
+    const sys = await (await fetch('/api/settings/system')).json();
+    const cb = sys.circuitBreakers || {};
+    const dd = Number(cb.maxDrawdownPct) || 0;
+    const dl = Number(cb.dailyLossLimitPct) || 0;
+    const el = $('cb-current');
+    if (!el) return;
+    el.textContent = `当前配置：回撤熔断 ${dd > 0 ? dd + '%' : '关闭'} · 日亏损限额 ${dl > 0 ? dl + '%' : '关闭'}`;
+  } catch { /* ignore */ }
+}
+
 // 切到设置页时刷新数据
 const _origSwitchTab = window.switchTab;
 window.switchTab = function (name) {
@@ -2700,11 +2817,13 @@ window.switchTab = function (name) {
     loadSlotsConfig();
     loadStrategies();
     loadSystemStatus();
+    loadCircuitBreakers();
   }
 };
 loadSlotsConfig();
 loadStrategies();
 loadSystemStatus();
+loadCircuitBreakers();
 
 // ══ AI 助手 ═══════════════════════════════════════════════════════════════
 const AI_ENV_MAP = {

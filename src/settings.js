@@ -170,6 +170,10 @@ export function getSystemStatus({ exchanges, sharedBridge, startedAt }) {
     },
     bridge: null,
     slots: {},
+    circuitBreakers: {
+      maxDrawdownPct: Number(process.env.MAX_DRAWDOWN_PCT || 0),
+      dailyLossLimitPct: Number(process.env.DAILY_LOSS_LIMIT_PCT || 0),
+    },
   };
 
   // 桥连接状态
