@@ -1,8 +1,10 @@
 <div align="center">
 
-# 🤖 外汇网格交易总控台（fx-grid-bot）
+# 🤖 SmartGrid FX
 
-**一套运行在 MT5 上的多品种网格交易系统 · 网页仪表盘 · AI 助手 · 免费开源**
+**外汇多品种网格交易总控台 · 网页仪表盘 · AI 助手 · 免费开源**
+
+![SmartGrid FX](public/smartgrid-fx.svg)
 
 [![GitHub stars](https://img.shields.io/github/stars/OneGearGo/-?style=for-the-badge&color=yellow)](https://github.com/OneGearGo/-/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](LICENSE)

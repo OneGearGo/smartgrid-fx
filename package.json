@@ -1,7 +1,7 @@
 {
-  "name": "fx-grid-bot",
-  "version": "0.3.0",
-  "description": "外汇多品种网格交易总控台：单 MT5 登入 + 5 品种网格 + 预留 5 平台接入位（复刻自 grid-bot-all / WGALL-ZJ005）。",
+  "name": "smartgrid-fx",
+  "version": "0.4.0",
+  "description": "SmartGrid FX — 外汇多品种网格交易总控台：单 MT5 登入 + 5 品种网格 + AI 助手 + 风控熔断（复刻自 grid-bot-all / WGALL-ZJ005）。",
   "license": "MIT",
   "type": "module",
   "scripts": {

@@ -532,7 +532,7 @@ if (!bridgeStatus) {
 // ── 启动横幅 ──────────────────────────────────────────────────────────────────
 const banner = `
 ${'─'.repeat(52)}
-  外汇网格交易总控台  v${process.env.npm_package_version || '0.1.0'}
+   SmartGrid FX · 外汇网格交易总控台  v${process.env.npm_package_version || '0.4.0'}
   ${'─'.repeat(52)}
   MT5 终端: ${cfg.mt5.terminalPath}
   账    户: ${cfg.mt5.login || '(未配置)'} @ ${cfg.mt5.server || '(未配置)'}
