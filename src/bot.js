@@ -475,10 +475,10 @@ export class GridBot {
       : typeof this.ex.balance === 'number' ? this.ex.balance : null;
     if (available != null) {
       if (requiredMargin > available) {
-        throw new Error(`保证金不足：该网格约需 ${round2(requiredMargin)} USDC（名义敞口 ${this.risk.notional}，${leverage}x），当前可用 ${round2(available)} USDC。请降低每格数量/网格数，或提高杠杆/充值后再启动。`);
+        throw new Error(`保证金不足：该网格约需 ${round2(requiredMargin)} USD（名义敞口 ${this.risk.notional}，${leverage}x），当前可用 ${round2(available)} USD。请降低每格数量/网格数，或提高杠杆/充值后再启动。`);
       }
       if (requiredMargin > available * 0.8) {
-        this._alert(`⚠️ 保证金占用偏高：约 ${round2(requiredMargin)} / 可用 ${round2(available)} USDC（>80%），价格波动时有强平风险。`);
+        this._alert(`⚠️ 保证金占用偏高：约 ${round2(requiredMargin)} / 可用 ${round2(available)} USD（>80%），价格波动时有强平风险。`);
       }
     }
 
@@ -621,7 +621,7 @@ export class GridBot {
     const available = typeof this.ex.equity === 'number' ? this.ex.equity
       : typeof this.ex.balance === 'number' ? this.ex.balance : null;
     if (available != null && requiredMargin > available) {
-      throw new Error(`保证金不足以支持新区间：约需 ${round2(requiredMargin)} USDC，当前可用 ${round2(available)} USDC。请缩小区间/减少格数后再试。`);
+      throw new Error(`保证金不足以支持新区间：约需 ${round2(requiredMargin)} USD，当前可用 ${round2(available)} USD。请缩小区间/减少格数后再试。`);
     }
 
     this._pauseTradingRuntime();
@@ -688,10 +688,10 @@ export class GridBot {
     const available = typeof this.ex.equity === 'number' ? this.ex.equity
       : typeof this.ex.balance === 'number' ? this.ex.balance : null;
     if (available != null && addMargin > available) {
-      throw new Error(`保证金不足以补 ${seeds.length} 格：约需 ${round2(addMargin)} USDC，当前权益 ${round2(available)} USDC。`);
+      throw new Error(`保证金不足以补 ${seeds.length} 格：约需 ${round2(addMargin)} USD，当前权益 ${round2(available)} USD。`);
     }
     if (available != null && addMargin > available * 0.5) {
-      this._alert(`⚠️ 补格将新占用约 ${round2(addMargin)} USDC 保证金（超过权益一半），请留意强平风险。`);
+      this._alert(`⚠️ 补格将新占用约 ${round2(addMargin)} USD 保证金（超过权益一半），请留意强平风险。`);
     }
     const before = this.active.size;
     const placementId = this._beginPlacementProgress('refill', seeds);

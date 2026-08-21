@@ -588,7 +588,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
       <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="switchTab('xau')">进入 XAUUSD 控制台 →</button>
     </div>
 
-    <!-- Robinhood Chain Lighter -->
+    <!-- NAS100 品种卡片 -->
     <div class="ov-card nas" data-prefix="nas">
       <div class="ov-exname" style="color:var(--nas-color)">
         <span class="run-dot" id="ov-nas-dot"></span>
@@ -1156,7 +1156,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- TAB: Robinhood Chain Lighter -->
+<!-- TAB: NAS100 -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <div id="tab-nas" class="tab-panel">
 <div class="wrap">
@@ -1309,13 +1309,14 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <p class="muted" style="margin-bottom:14px;line-height:1.6">
       配置代理后，服务器重启才能生效（修改 <code style="background:var(--bg2);padding:1px 5px;border-radius:3px">.env</code> 文件中对应字段）。<br>
       下方"测试连接"按钮会通过当前已配置的代理检测出口IP，无需重启。<br>
-      <strong style="color:var(--yel)">全局代理</strong>优先级最高，会覆盖各交易所独立代理。
+      <strong style="color:var(--yel)">全局代理</strong>优先级最高，会覆盖各品种独立代理。<br>
+      <span class="muted">MT5 行情/下单走本地终端直连，不经此代理；代理用于 AI 服务与通知推送的出网（如 AI API 需科学上网时）。</span>
     </p>
 
     <!-- 全局代理 -->
     <div class="ip-section">
       <div class="ip-section-title">🌐 全局代理（GLOBAL_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">同时应用于所有五个交易所。留空则各交易所使用各自配置。</p>
+      <p class="muted" style="margin-bottom:8px">同时应用于所有五个品种。留空则各品种使用各自配置。</p>
       <div class="ip-row">
         <div>
           <label>代理地址</label>
@@ -1329,7 +1330,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <!-- EURUSD 代理 -->
     <div class="ip-section">
       <div class="ip-section-title" style="color:var(--eur-color)">⬡ EURUSD 独立代理（EUR_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">仅用于 EURUSD 交易所。支持 HTTP(S) 和 SOCKS5（含用户名密码认证）。</p>
+      <p class="muted" style="margin-bottom:8px">仅用于 EURUSD 槽位。支持 HTTP(S) 和 SOCKS5（含用户名密码认证）。</p>
       <div class="ip-row">
         <div>
           <label>代理地址</label>
@@ -1343,7 +1344,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <!-- GBPUSD 代理 -->
     <div class="ip-section">
       <div class="ip-section-title" style="color:var(--gbp-color)">⬡ GBPUSD 独立代理（GBP_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">仅用于 GBPUSD 交易所。</p>
+      <p class="muted" style="margin-bottom:8px">仅用于 GBPUSD 槽位。</p>
       <div class="ip-row">
         <div>
           <label>代理地址</label>
@@ -1357,7 +1358,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <!-- USDJPY 代理 -->
     <div class="ip-section">
       <div class="ip-section-title" style="color:var(--jpy-color)">⬡ USDJPY 独立代理（JPY_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">仅用于 USDJPY 交易所。</p>
+      <p class="muted" style="margin-bottom:8px">仅用于 USDJPY 槽位。</p>
       <div class="ip-row">
         <div>
           <label>代理地址</label>
@@ -1371,7 +1372,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <!-- XAUUSD 代理 -->
     <div class="ip-section">
       <div class="ip-section-title" style="color:var(--xau-color)">⬡ XAUUSD 独立代理（XAU_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">仅用于 XAUUSD 交易所。</p>
+      <p class="muted" style="margin-bottom:8px">仅用于 XAUUSD 槽位。</p>
       <div class="ip-row">
         <div>
           <label>代理地址</label>
@@ -1385,7 +1386,7 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
     <!-- NAS100 代理 -->
     <div class="ip-section">
       <div class="ip-section-title" style="color:var(--nas-color)">⬡ NAS100 独立代理（NAS_PROXY）</div>
-      <p class="muted" style="margin-bottom:8px">仅用于 Robinhood Chain Lighter 交易所。</p>
+      <p class="muted" style="margin-bottom:8px">仅用于 NAS100 槽位。</p>
       <div class="ip-row">
         <div>
           <input id="ip-nas" type="text" placeholder="例如 socks5://user:pass@host:port" autocomplete="off" />
@@ -1405,8 +1406,8 @@ th { color: var(--mut2); font-weight: 600; font-size: 10px; text-transform: uppe
 
     <div class="warn-box" style="margin-top:4px">
       ⚠ 写入 .env 后需<strong>重启服务器</strong>才能让代理生效。<br>
-      不同交易所配置不同代理时，因 Node.js 技术限制，实际生效代理为全局设置（GLOBAL_PROXY）。<br>
-      如需严格隔离，建议分开部署各交易所版本。
+      不同品种配置不同代理时，因 Node.js 技术限制，实际生效代理为全局设置（GLOBAL_PROXY）。<br>
+      如需严格隔离，建议分开部署各品种。
     </div>
   </div>
 </div>
@@ -1497,14 +1498,14 @@ function issueHtml(issue, fallbackAddress) {
   const address = issue.apiWalletAddress || fallbackAddress || '';
   const validAddress = /^0x[0-9a-f]+$/i.test(address);
   const addressHtml = address
-    ? `<div style="margin-top:5px">API Wallet：<code>${escapeHtml(address)}</code>${validAddress ? ` <button class="btn btn-ghost" style="width:auto;margin:4px 0 0;padding:3px 8px;font-size:10px" onclick='copyWalletAddress(${JSON.stringify(address)})'>复制地址</button>` : ''}</div>`
+    ? `<div style="margin-top:5px">参考地址：<code>${escapeHtml(address)}</code>${validAddress ? ` <button class="btn btn-ghost" style="width:auto;margin:4px 0 0;padding:3px 8px;font-size:10px" onclick='copyWalletAddress(${JSON.stringify(address)})'>复制地址</button>` : ''}</div>`
     : '';
   return `<strong>⚠ ${escapeHtml(issue.title || '交易操作异常')}</strong><br>${escapeHtml(issue.message || '')}${addressHtml}`;
 }
 
 async function copyWalletAddress(address) {
   try { await navigator.clipboard.writeText(address); }
-  catch { window.prompt('复制 API Wallet 地址：', address); }
+  catch { window.prompt('复制参考地址：', address); }
 }
 
 const RISK = {
@@ -1727,7 +1728,7 @@ function makeExchangeCtrl(prefix, chartId) {
     const cs = mkt?.contractSize > 0 ? mkt.contractSize : 1; // 外汇合约规模
     const mid = (lo+hi)/2, spacing = (hi-lo)/n;
     const notional = n*sz*cs*mid, margin = notional/lev;
-    P('risk-preview').innerHTML = `单格间距 <b>${spacing.toPrecision(4)}</b>（${(spacing/mid*100).toFixed(2)}%）· 每格毛利 <b>${(spacing*sz*cs).toPrecision(3)}</b><br>名义敞口 <b>${notional.toFixed(0)}</b> · 约需保证金 <b>${margin.toFixed(0)}</b> USDC（${lev}x）`;
+    P('risk-preview').innerHTML = `单格间距 <b>${spacing.toPrecision(4)}</b>（${(spacing/mid*100).toFixed(2)}%）· 每格毛利 <b>${(spacing*sz*cs).toPrecision(3)}</b><br>名义敞口 <b>${notional.toFixed(0)}</b> · 约需保证金 <b>${margin.toFixed(0)}</b> USD（${lev}x）`;
   }
 
   ['lower','upper','grid-count','size-base','leverage'].forEach(id => P(id).addEventListener('input', updateRiskPreview));
@@ -1797,7 +1798,7 @@ function makeExchangeCtrl(prefix, chartId) {
   };
 
   P('reset-btn').onclick = async () => {
-    if (!confirm('确认重置该交易所的统计？\n已实现盈亏、收益率、成交量、完成格数将清零，并以当前权益为新基准。\n（不影响持仓与挂单）')) return;
+    if (!confirm('确认重置该品种的统计？\n已实现盈亏、收益率、成交量、完成格数将清零，并以当前权益为新基准。\n（不影响持仓与挂单）')) return;
     const btn = P('reset-btn'), old = btn.textContent;
     setExchangeActionBusy(prefix, true); btn.textContent = '重置中…';
     setActionStatus(prefix, 'pending', '正在重置本地统计，不会改动持仓和挂单…');
@@ -1815,7 +1816,7 @@ function makeExchangeCtrl(prefix, chartId) {
   if (P('adopt-btn')) P('adopt-btn').onclick = () => adoptEx(prefix, P('adopt-btn'));
 
   P('cancel-orders-btn').onclick = async () => {
-    if (!confirm('确认一键撤销该交易所的全部挂单？\n持仓不受影响（不会平仓）。网格将停止，需要时可重新启动。')) return;
+    if (!confirm('确认一键撤销该品种的全部挂单？\n持仓不受影响（不会平仓）。网格将停止，需要时可重新启动。')) return;
     const btn = P('cancel-orders-btn'), old = btn.textContent;
     setExchangeActionBusy(prefix, true); btn.textContent = '撤单并确认中…';
     setActionStatus(prefix, 'pending', '撤单请求已发送，正在等待交易所连续确认真实挂单为 0；持仓不会被平掉…');
@@ -2009,12 +2010,8 @@ function makeExchangeCtrl(prefix, chartId) {
     P('alerts').innerHTML = (s.alerts||[]).map(a => `<div class="log-item">${new Date(a.t).toLocaleTimeString()} · ${a.message}</div>`).join('') || '<div class="log-item muted">暂无日志</div>';
     const actionIssue = P('action-issue');
     if (actionIssue) {
-      const legacyGasError = (s.alerts || []).some(a => /INSUFFICIENT_BALANCE_FOR_TRANSACTION_FEE/i.test(a.message || ''));
-      const issue = s.operationalIssue || (legacyGasError ? {
-        title: 'EURUSD API 签名钱包没有足够的 APT 支付链上手续费',
-        message: '交易账户中的 USDC 不能支付 Aptos Gas；请向 API Wallet 充值 APT 后再下单。',
-        apiWalletAddress: s.apiWalletAddress,
-      } : null);
+      // 加密版遗留的链上 Gas 提示（APT/USDC）已不适用外汇 MT5，移除
+      const issue = s.operationalIssue || null;
       actionIssue.style.display = issue ? '' : 'none';
       actionIssue.innerHTML = issueHtml(issue, s.apiWalletAddress);
     }
@@ -2133,7 +2130,7 @@ async function refreshProxyStatus() {
     const r = await (await fetch('/api/proxy-check')).json();
     if (r.ok) {
       el.className = 'conn online'; txt.textContent = '代理正常';
-      const source = cfg.windowsSystem ? 'Windows 系统代理' : (cfg.global ? '全局代理' : '交易所独立代理');
+      const source = cfg.windowsSystem ? 'Windows 系统代理' : (cfg.global ? '全局代理' : '品种独立代理');
       el.title = `${source}正常 · 出口 IP：${r.ip}`;
     } else {
       el.className = 'conn offline'; txt.textContent = '代理异常';
@@ -2489,11 +2486,11 @@ async function loadProxyConfig() {
     const r = await fetch('/api/proxy-config');
     const j = await r.json();
     if (j.global) $('ip-global').value = j.global;
-    if (j.de) $('ip-de').value = j.de;
-    if (j.ex) $('ip-ex').value = j.ex;
-    if (j.rs) $('ip-rs').value = j.rs;
-    if (j.ar) $('ip-ar').value = j.ar;
-    if (j.lr) $('ip-lr').value = j.lr;
+    if (j.eur) $('ip-eur').value = j.eur;
+    if (j.gbp) $('ip-gbp').value = j.gbp;
+    if (j.jpy) $('ip-jpy').value = j.jpy;
+    if (j.xau) $('ip-xau').value = j.xau;
+    if (j.nas) $('ip-nas').value = j.nas;
   } catch {}
 }
 loadProxyConfig();
