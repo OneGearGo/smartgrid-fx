@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](LICENSE)
 [![Node](https://img.shields.io/badge/Node.js-20%2B-blue?style=for-the-badge)](https://nodejs.org)
 
-**如果这个项目帮到了你，请点亮 ⭐ Star —— 这是对开源作者最大的支持！**
+**如果这个项目帮到了你，请点亮 ⭐ Star；想一起交流网格策略，欢迎关注文末公众号！**
 
 </div>
 
@@ -59,23 +59,17 @@
 
 ---
 
-## ☕ 支持这个项目
+## 📣 关注公众号
 
-如果你觉得这个项目有用：
+**公众号：悟空悟道** 🐵
 
-| 方式 | 说明 |
-| --- | --- |
-| ⭐ **Star** | 点亮 GitHub Star，让更多人看到它 |
-| 🍵 **打赏** | 微信/支付宝赞赏码见下方，或[爱发电](https://afdian.com)赞助主页 |
-| 📣 **分享** | 转发给做量化/外汇的朋友 |
-| 🐛 **反馈** | 提 Issue / PR，一起改进 |
+持续更新：网格策略实战记录、踩坑复盘、参数调优、AI 交易新玩法。
 
-> 作者花了上百小时打磨这套系统。你的每一次支持（Star/打赏/反馈）都是持续更新的动力 🙏
+<img src="docs/qrcode-gongzhonghao.png" width="220" alt="悟空悟道公众号二维码"/>
 
-<!-- 赞赏码占位：放你的微信/支付宝收款码图片
-<img src="docs/donate-wechat.png" width="180" alt="微信赞赏码"/>
-<img src="docs/donate-alipay.png" width="180" alt="支付宝赞赏码"/>
--->
+<!-- 操作说明：把公众号二维码截图保存为 docs/qrcode-gongzhonghao.png 后推送即可显示 -->
+
+> **如果这个项目帮到了你，请点亮 ⭐ Star；想一起交流策略，欢迎关注公众号「悟空悟道」！**
 
 ---
 
