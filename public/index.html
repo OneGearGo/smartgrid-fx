@@ -3049,10 +3049,10 @@ async function aiAnalyze(p, btn) {
     else {
       box.className = 'ai-box';
       box.textContent =
-        `【${AI_EXNAME[p]} · ${j.market} · 现价 ${j.price}】\n` +
+        `【${AI_EXNAME[p]} · ${j.market} · 现价 ${fmtAIPrice(j.price)}】\n` +
         `市况：${j.regime} · ${j.suitable ? '✅ 适合跑网格' : '⛔ 当前不适合跑网格'} · 置信度 ${Math.round((j.confidence || 0) * 100)}%\n` +
         `建议模式：${j.recommendMode === 'long' ? '做多网格' : j.recommendMode === 'short' ? '做空网格' : '中性网格'}` +
-        (j.suggestedRange ? ` · 区间 ${j.suggestedRange.lower} ~ ${j.suggestedRange.upper}` : '') +
+        ((j.suggestedRange && Number(j.suggestedRange.lower) > 0) ? ` · 区间 ${fmtAIPrice(j.suggestedRange.lower)} ~ ${fmtAIPrice(j.suggestedRange.upper)}` : '') +
         (j.suggestedGridCount ? ` · ${j.suggestedGridCount} 格` : '') +
         (j.suggestedSpacingPct ? ` · 间距约 ${j.suggestedSpacingPct}%` : '') +
         `\n分析：${j.reasoning || ''}` +
@@ -3145,11 +3145,22 @@ async function aiExecAction(action, card, okBtn) {
 }
 
 // 市况报告文本（总览页/复用）
+// 现价/区间展示用按数值大小自适应的小数位，避免浮点长尾（如 158.92649999999998）
+function fmtAIPrice(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return '—';
+  const digits = n < 10 ? 5 : n < 1000 ? 3 : 2; // 外汇(<10)取5位，金银(<1000)取3位，指数取2位
+  return n.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 0 });
+}
+
 function aiRegimeText(j) {
-  return `【${j.market} · 现价 ${j.price}】\n` +
+  const priceTxt = fmtAIPrice(j.price);
+  const rangeTxt = (j.suggestedRange && Number(j.suggestedRange.lower) > 0)
+    ? ` · 区间 ${fmtAIPrice(j.suggestedRange.lower)} ~ ${fmtAIPrice(j.suggestedRange.upper)}` : '';
+  return `【${j.market} · 现价 ${priceTxt}】\n` +
     `市况：${j.regime} · ${j.suitable ? '✅ 适合跑网格' : '⛔ 当前不适合跑网格'} · 置信度 ${Math.round((j.confidence || 0) * 100)}%\n` +
     `建议模式：${j.recommendMode === 'long' ? '做多网格' : j.recommendMode === 'short' ? '做空网格' : '中性网格'}` +
-    (j.suggestedRange ? ` · 区间 ${j.suggestedRange.lower} ~ ${j.suggestedRange.upper}` : '') +
+    rangeTxt +
     (j.suggestedGridCount ? ` · ${j.suggestedGridCount} 格` : '') +
     (j.suggestedSpacingPct ? ` · 间距约 ${j.suggestedSpacingPct}%` : '') +
     `\n分析：${j.reasoning || ''}` + (j.caution ? `\n⚠️ ${j.caution}` : '');
