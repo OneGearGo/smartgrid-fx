@@ -1,10 +1,10 @@
-# 打赏/赞助配置
-# 收款渠道（按可用性配置）：
-#   1. GitHub Sponsors —— 需绑定 PayPal（你已有 PayPal 账户）
-#   2. 爱发电（afdian.com）—— 国内备用渠道
-#   3. 微信/支付宝赞赏码 —— 放到 docs/ 目录，在 README 里展示
-# 说明：GitHub 仓库页右上角的 Sponsor 按钮认 github/custom 字段。
+# 打赏/赞助配置（纯国内渠道）
+# GitHub Sponsors 不支持中国大陆（含中国 PayPal 账户），改用：
+#   1. 爱发电（afdian.com）—— 国内创作者赞助平台，注册后填你的主页链接
+#   2. 微信/支付宝赞赏码 —— 放到 docs/ 目录，在 README 里展示
+#   3. 公众号赞赏 —— 原创推文自带赞赏按钮
+# 启用步骤：注册爱发电后，把 custom 里的链接替换成你的主页地址。
 
-github: OneGearGo    # 在 GitHub 设置里开启 Sponsors 并绑定 PayPal 后生效
+# github: OneGearGo   # 仅当你拿到海外收款渠道（海外银行/PayPal 海外账户）后才可启用
 custom:
-  - "https://afdian.com/a/你的爱发电ID"   # 可选：爱发电主页
+  - "https://afdian.com/a/你的爱发电ID"   # ← 注册爱发电后替换为你的链接

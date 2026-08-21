@@ -38,7 +38,7 @@
 | 方式 | 说明 |
 | --- | --- |
 | ⭐ **Star** | 点亮 GitHub Star，让更多人看到它 |
-| 🍵 **打赏** | 微信/支付宝赞赏码见下方，[GitHub Sponsors](https://github.com/sponsors/OneGearGo)（PayPal），或[爱发电](https://afdian.com) |
+| 🍵 **打赏** | 微信/支付宝赞赏码见下方，或[爱发电](https://afdian.com)赞助主页 |
 | 📣 **分享** | 转发给做量化/外汇的朋友 |
 | 🐛 **反馈** | 提 Issue / PR，一起改进 |
 
