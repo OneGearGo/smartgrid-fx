@@ -4,7 +4,9 @@
 
 **外汇多品种网格交易总控台 · 网页仪表盘 · AI 助手 · 免费开源**
 
-![SmartGrid FX](public/smartgrid-fx.svg)
+<p align="center">
+  <img src="public/smartgrid-fx.svg" width="96" height="96" alt="SmartGrid FX Logo"/>
+</p>
 
 [![GitHub stars](https://img.shields.io/github/stars/OneGearGo/-?style=for-the-badge&color=yellow)](https://github.com/OneGearGo/-/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](LICENSE)
