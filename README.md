@@ -8,7 +8,7 @@
   <img src="public/smartgrid-fx.svg" width="96" height="96" alt="SmartGrid FX Logo"/>
 </p>
 
-[![GitHub stars](https://img.shields.io/github/stars/OneGearGo/-?style=for-the-badge&color=yellow)](https://github.com/OneGearGo/-/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/OneGearGo/smartgrid-fx?style=for-the-badge&color=yellow)](https://github.com/OneGearGo/smartgrid-fx/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](LICENSE)
 [![Node](https://img.shields.io/badge/Node.js-20%2B-blue?style=for-the-badge)](https://nodejs.org)
 
