@@ -18,6 +18,22 @@
 
 ---
 
+## 📸 界面预览
+
+<div align="center">
+
+**总览仪表盘** — 五品种实时状态、盈亏、持仓、保证金水平一屏掌握
+
+<img src="docs/screenshots/dashboard-overview.png" width="900" alt="SmartGrid FX 总览仪表盘"/>
+
+**设置中心** — 品种槽位管理 / 策略模板库 / 风控熔断 / 系统状态
+
+<img src="docs/screenshots/dashboard-settings.png" width="900" alt="SmartGrid FX 设置中心"/>
+
+</div>
+
+---
+
 ## ✨ 功能亮点
 
 - 🕸 **五品种网格**：EURUSD / GBPUSD / USDJPY / XAUUSD / NAS100 同时跑，互不干扰
