@@ -65,9 +65,9 @@
 
 持续更新：网格策略实战记录、踩坑复盘、参数调优、AI 交易新玩法。
 
-<img src="docs/qrcode-gongzhonghao.png" width="220" alt="悟空悟道公众号二维码"/>
+<img src="docs/qrcode-gongzhonghao.jpg" width="220" alt="悟空悟道公众号二维码"/>
 
-<!-- 操作说明：把公众号二维码截图保存为 docs/qrcode-gongzhonghao.png 后推送即可显示 -->
+<!-- 操作说明：公众号二维码已上传为 docs/qrcode-gongzhonghao.jpg -->
 
 > **如果这个项目帮到了你，请点亮 ⭐ Star；想一起交流策略，欢迎关注公众号「悟空悟道」！**
 
